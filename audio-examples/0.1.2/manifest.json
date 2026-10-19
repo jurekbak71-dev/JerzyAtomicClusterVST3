@@ -1,0 +1,73 @@
+{
+  "version": "0.1.2",
+  "dll_sha256": "8e1ff041e3fc8aa829b0ce4ef3299c113c041777724048cdfa672e2dfe878730",
+  "source": "original synthetic plucked phrase; no uploaded reference media",
+  "renders": [
+    {
+      "file": "00_dry.mp3",
+      "sha256": "bcca48c7a0e47781106d25322896b8989ed8c1f2ddcc3dc085cb6ee601ef0735",
+      "blend": 0,
+      "refresh_ms": 100,
+      "atoms": 4,
+      "smooth": false,
+      "flat": false,
+      "peak": 0.449981689453125,
+      "rms": 0.07223021513639288
+    },
+    {
+      "file": "01_sharp_sparse.mp3",
+      "sha256": "c7be1ff4e1a425de49751c05eca1607548a14251a59f76794b5a020b76d48461",
+      "blend": 1,
+      "refresh_ms": 160,
+      "atoms": 4,
+      "smooth": false,
+      "flat": false,
+      "peak": 0.332977294921875,
+      "rms": 0.06514583222214686
+    },
+    {
+      "file": "02_smooth_hold.mp3",
+      "sha256": "c41c9141b30da345eab75543c61603229839e9c7661be45f8c1eb278340c90a3",
+      "blend": 1,
+      "refresh_ms": 900,
+      "atoms": 6,
+      "smooth": true,
+      "flat": false,
+      "peak": 0.27545166015625,
+      "rms": 0.048295839816360896
+    },
+    {
+      "file": "03_smooth_chords.mp3",
+      "sha256": "8d894dac2d3120957ae4e82bb3b19a9b24c9d64ba65db36f2c854cc072b7d088",
+      "blend": 0.85,
+      "refresh_ms": 450,
+      "atoms": 18,
+      "smooth": true,
+      "flat": false,
+      "peak": 0.29150390625,
+      "rms": 0.04327619365731557
+    },
+    {
+      "file": "04_flat_glitch.mp3",
+      "sha256": "275870799bad1f81495c09aaed46a2848127b87d78ce6a849703364b2aa46b0d",
+      "blend": 1,
+      "refresh_ms": 300,
+      "atoms": 3,
+      "smooth": false,
+      "flat": true,
+      "peak": 0.297454833984375,
+      "rms": 0.062020871840850395
+    },
+    {
+      "file": "05_fast_cluster.mp3",
+      "sha256": "7e9c8453c6d858271938f14b995ff8b28de6390f73d4b03721ed6761dc272e74",
+      "blend": 0.9,
+      "refresh_ms": 28,
+      "atoms": 48,
+      "smooth": true,
+      "flat": false,
+      "peak": 0.35302734375,
+      "rms": 0.05933106362001232
+    }
+  ]
+}

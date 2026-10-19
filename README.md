@@ -1,15 +1,18 @@
-# Jerzy Atomic Cluster — VST3 0.1.1
+# Jerzy Atomic Cluster — VST3 0.1.2
 
 Eksperymentalny dekompozytor widma dla Windows x64, inspirowany zachowaniem
 EHX Pico Atomic Cluster opisanym w instrukcji producenta. Własny algorytm DSP;
 nie jest to oficjalna wtyczka EHX ani potwierdzona kopia brzmienia kostki.
 
-[Pobierz Windows VST3 0.1.1](releases/0.1.1/JerzyAtomicClusterVST3-Win64.zip)
+[Pobierz Windows VST3 0.1.2](releases/0.1.1/JerzyAtomicClusterVST3-Win64.zip)
 
-[Pięć przykładów brzmienia — MP3 i WAV](audio-examples/README.md)
+[Nowe próbki 0.1.2 — pięć ustawień pod film](audio-examples/0.1.2/README.md)
+
+[Archiwalne próbki 0.1.0](audio-examples/README.md)
 
 [Analiza materiału referencyjnego i poprawka ATOMS](docs/reference-analysis/REPORT.md)
-— przykłady powyżej pochodzą z wersji 0.1.0. W 0.1.1 zmieniła się selekcja składowych.
+— w 0.1.1 poprawiono selekcję składowych. W 0.1.2 SMOOTH ma dłuższe przejścia,
+a wygaszane tony zachowują wysokość po kolejnych pobraniach widma.
 
 [Analiza filmu: ustawienia gałek, tryby i pozostały tor efektów](docs/reference-analysis/video/VIDEO_FINDINGS.md).
 

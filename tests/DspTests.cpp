@@ -54,6 +54,25 @@ int main() try {
         const double ratio=tone(y,880,48000)/tone(y,440,48000);
         check(ratio>.85 && ratio<1.18, "flat mode should equalize distinct partials"); ++passed;
     }
+    // A released held tone must decay at its captured pitch, including after
+    // the next capture sees only silence (old code retuned it to the FFT bin).
+    {
+        auto held = defaults(); held[Blend] = held[Smooth] = 1;
+        held[Atoms] = 0; held[Speed] = std::log(.5/2.)/std::log(1./750.);
+        Engine e; e.reset(48000,held); std::vector<double> tail;
+        for (int i=0;i<96000;++i) {
+            const double x=i<52800 ? .2*std::sin(2*pi*440*i/48000) : 0;
+            const double y=e.process(x,x,held)[0];
+            if(i>=76800) tail.push_back(y);
+        }
+        double best=0, frequency=0;
+        for (double f=435;f<=450;f+=.25) {
+            const double amplitude=tone(tail,f,48000);
+            if(amplitude>best) { best=amplitude; frequency=f; }
+        }
+        check(best>1e-5 && std::abs(frequency-440)<1.5, "released SMOOTH tone must retain captured pitch");
+        ++passed;
+    }
     // Dry mix and bypass must preserve the delayed input exactly at unity gain.
     for (int bypass : {0, 1}) {
         p = defaults(); p[Blend] = 0; p[Bypass] = bypass;

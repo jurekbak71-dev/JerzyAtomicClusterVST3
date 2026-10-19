@@ -113,10 +113,16 @@ class SpectralChannel {
                     relativePhase[k] = wrap(previousPhase[k]-previousPhase[center]);
                 }
             }
-            heldDelta = delta;
+            // A disappearing partial must finish fading at its old pitch.
+            // Updating every bin here made the released note follow unrelated
+            // input phase estimates, producing chirps during SMOOTH transitions.
+            for (int k = 1; k < bins-1; ++k)
+                if (target[k] > 0) heldDelta[k] = delta[k];
             untilRefresh += std::max(double(hopSize), seconds * sampleRate);
         }
-        const double fadeTime = std::min(.08, seconds * .5);
+        // Scale the crossfade with capture time: slow captures should become
+        // sustained pads rather than short, almost SHARP amplitude steps.
+        const double fadeTime = std::clamp(seconds * .32, .003, .45);
         const double alpha = p[Smooth] >= .5 ? 1 - std::exp(-hopSize / (sampleRate * fadeTime)) : 1.;
         for (int k = 0; k < bins; ++k) {
             magnitude[k] += alpha * (target[k] - magnitude[k]);
@@ -126,7 +132,12 @@ class SpectralChannel {
         }
         // Phase-lock each selected partial's window lobes to its center.
         for (int k = 1; k < bins-1; ++k)
-            if (owner[k] >= 0 && owner[k] != k) phase[k] = wrap(phase[owner[k]]+relativePhase[k]);
+            if (owner[k] >= 0 && owner[k] != k) {
+                const double locked = wrap(phase[owner[k]]+relativePhase[k]);
+                // Reassigning a lobe at a capture must not jump its phase in
+                // SMOOTH mode. SHARP retains the immediate phase lock.
+                phase[k] = wrap(phase[k] + alpha * wrap(locked-phase[k]));
+            }
         for (int k = 0; k < bins; ++k) spectrum[k] = std::polar(magnitude[k], phase[k]);
         spectrum[0] = spectrum[fftSize / 2] = 0.;
         for (int k = 1; k < fftSize / 2; ++k) spectrum[fftSize - k] = std::conj(spectrum[k]);

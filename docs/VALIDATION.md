@@ -1,4 +1,4 @@
-# Validation — 0.1.1
+# Validation — 0.1.2
 
 ## Verified in the cloud instance
 
@@ -8,12 +8,12 @@
 - Linux native VST3 validator: **47 passed, 0 failed**.
 - Linux CTest: **2 suites passed, 0 failed** (`dsp_regression`, `processor_state`).
 - Windows binaries executed under Wine 10.0 with an Xvfb display:
-  - **18 DSP checks passed**: FFT reconstruction, aligned dry/bypass,
+  - **19 DSP checks passed**: FFT reconstruction, aligned dry/bypass,
     stereo polarity, fundamental/harmonic retention at full resolution,
     weaker-tone rejection with one atom, finite output across several sample rates,
     both transition modes, silence and recovery from invalid input; two independent
     partials retained with ATOMS=2 in Sharp and Smooth, and Flat equalization
-    of those partials.
+    of those partials; captured-pitch retention during release.
   - **9 processor/state checks passed**: parameter IDs, all-control state restore,
     invalid/truncated state rejection without partial modification, mono/stereo,
     delayed bypass, automation persistence, concurrent restore while processing,
@@ -25,6 +25,21 @@
     also completed successfully. Screenshot inspected.
 - Windows DLL imports only system libraries (GDI32, KERNEL32, MSVCRT, OLE32, USER32),
   without external GCC runtime DLL requirements.
+
+## 0.1.2 sound changes
+
+SMOOTH crossfade time now scales with capture interval (3–450 ms rather than
+an 80 ms maximum). Newly assigned spectral lobes approach their phase lock
+progressively. Disappearing partials retain captured phase increments during
+release instead of using estimates from the new, unrelated or silent input.
+A 440 Hz held-note/release regression passes in this release and fails when
+compiled against the previous 0.1.1 DSP. These are controlled DSP checks,
+not a perceptual similarity score against the uploaded demonstration.
+
+Five new examples render the packaged Windows DLL on the same original
+synthetic plucked phrase, without additional reverb, delay or normalization.
+The reference film includes other equipment; no isolated paired dry/wet
+recording is available. The uploaded reference media is not redistributed.
 
 ## Diagnosed and corrected before packaging
 
