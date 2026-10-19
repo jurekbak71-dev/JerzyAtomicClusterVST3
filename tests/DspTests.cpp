@@ -112,7 +112,7 @@ int main() try {
         Engine e; e.reset(48000,p); double energy=0;
         for(int i=0;i<62400;++i) {
             double x=i>=48000 ? .15*std::sin(2*pi*220*i/48000):0;
-            auto y=e.process(x,x,p); if(i>=57600) energy+=y[0]*y[0];
+            auto y=e.process(x,x,p); if(i>=57600) energy+=y[0]*y[0]+y[1]*y[1];
         }
         check(energy>1,"late input onset must excite an empty held patch promptly"); ++passed;
     }
@@ -157,6 +157,32 @@ int main() try {
             if(i>24000) energy+=y[0]*y[0]+y[1]*y[1];
         }
         check(energy>10,"anti-phase input must still excite atoms"); ++passed;
+    }
+    // Grid phase follows supplied project position, not the activation time.
+    for(double bpm:{90.,120.,180.}) {
+        auto p=defaults(); p[Sync]=1; p[Division]=0; p[Atoms]=p[Stereo]=0;
+        Engine e; e.reset(48000,p); double energy=0; int gates=0;
+        for(int i=0;i<96000;++i) {
+            double beat=.375+i*bpm/(60.*48000);
+            double x=.15*std::sin(2*pi*220*i/48000); auto y=e.process(x,x,p,bpm,beat);
+            energy+=y[0]*y[0];
+            double cycle=beat/.25;
+            if(i>12000 && std::abs(cycle-std::round(cycle))<1e-8) { check(std::abs(y[0])<1e-7,"sync pulse must meet host beat boundary"); ++gates; }
+        }
+        check(energy>10 && gates>5,"synced audio must play at multiple BPM values"); ++passed;
+    }
+    // New BPM takes effect during playback, and seeking rephases the pulse.
+    {
+        auto p=defaults(); p[Sync]=1; p[Division]=.5; p[Atoms]=p[Stereo]=0;
+        Engine e; e.reset(48000,p); double beat=.375,energy=0; int gates=0;
+        for(int i=0;i<144000;++i) {
+            double bpm=i<48000 ? 120:90;
+            if(i==96000) beat=8.;
+            auto y=e.process(.15*std::sin(2*pi*220*i/48000),0,p,bpm,beat); energy+=y[0]*y[0];
+            if(i>12000 && std::abs(beat-std::round(beat))<1e-8) { check(std::abs(y[0])<1e-7,"tempo change/seek must preserve beat phase"); ++gates; }
+            beat+=bpm/(60*48000.);
+        }
+        check(energy>10 && gates>=4,"exercise live BPM change and transport seek"); ++passed;
     }
     std::cout<<passed<<" DSP checks passed\n"; return 0;
 } catch(const std::exception& e) { std::cerr<<"FAIL: "<<e.what()<<'\n'; return 1; }

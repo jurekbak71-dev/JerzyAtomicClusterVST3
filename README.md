@@ -1,14 +1,18 @@
-# Jerzy Atomic Cluster — VST3 0.2.0
+# Jerzy Atomic Cluster — VST3 0.2.1
 
 Efekt dla Windows x64: harmoniczne atomy, rytmiczne arpeggio, losowe wzory
 i niezależny ruch głosów w stereo. Własny algorytm inspirowany Pico Atomic
 Cluster, rozwinięty według uwag odsłuchowych użytkownika.
 
-**[Pobierz Windows VST3 0.2.0](releases/0.2.0/JerzyAtomicClusterVST3-Win64.zip)**
+**[Pobierz Windows VST3 0.2.1](releases/0.2.1/JerzyAtomicClusterVST3-Win64.zip)**
 
-**[▶ Porównanie audio: dry, 1/16/64 atomy, ARP, RANDOM, SMOOTH, stereo](audio-examples/0.2.0/README.md)**
+**[▶ Test stereo i BPM: mono-in → stereo-out, 90/120 BPM](audio-examples/0.2.1/README.md)**
 
-W 0.2.0 wet pochodzi wyłącznie z banku oscylatorów. Zwiększenie ATOMS dodaje
+W 0.2.1 poprawiono mono-in → stereo-out oraz wzmocniono słyszalny ruch
+panoramy. Widoczny przycisk **BPM SYNC** synchronizuje SPEED z tempem i siatką
+muzyczną hosta. W trybie sync gałka SPEED wybiera 1/16, 1/8, 1/4, 1/2 lub takt.
+
+Od 0.2.0 wet pochodzi wyłącznie z banku oscylatorów. Zwiększenie ATOMS dodaje
 głosy i harmoniczne, zamiast przywracać oryginalne widmo. Ich poziom jest
 wyrównywany, aby gęsty efekt nie zanikał. BLEND = 100% wyklucza tor dry.
 SHARP nadaje atomom puls, SMOOTH łagodnie zmienia ich poziomy i wysokości.
@@ -31,21 +35,25 @@ zachowaj znajdujące się w nim podfoldery `Contents`.
 
 - **VOL** — poziom wyjściowy; środek = unity, maksimum około +6 dB.
 - **BLEND** — 0% = wyłącznie dry, 100% = wyłącznie atomy (wet). Domyślnie 100%.
-- **SPEED** — szybkość aktualizacji widma; w prawo = szybciej.
+- **SPEED** — w FREE: szybkość odświeżania; w BPM SYNC: podział nutowy.
+- **FREE / BPM SYNC** — przycisk po lewej stronie diody. Włącza synchronizację
+  do tempa hosta i jego pozycji muzycznej podczas odtwarzania. Przycisk po prawej
+  wybiera podział: 1/16, 1/8, 1/4, 1/2, 1 bar. Nie trzeba otwierać menu.
 - **ATOMS** — 1–64 głosy. Więcej atomów zagęszcza harmoniczne, również przy
   prostym wejściu z niewielką liczbą składowych.
 - **CLUSTER / ARP / RANDOM** — widoczne przyciski pod gałkami. CLUSTER łączy
   rozpoznane składowe z dodatkowymi harmonicznymi. ARP prowadzi rytmiczną
   sekwencję oktaw, kwint i tercji. RANDOM losuje harmonicznie powiązane głosy.
-- **STEREO** — kliknij pasek nad przyciskami patternu, aby przełączyć 0 / 50 / 100%.
-  Dokładna regulacja jest też dostępna w parametrach hosta; domyślnie 85%.
-  Każdy atom ma osobny ruch panoramy, także przy wejściu mono na szynie stereo.
+- **STEREO ON/OFF** — osobny przełącznik pod gałkami; obok przeciągany suwak
+  WIDTH 0–100%. Domyślnie 100%. Skoordynowane orbity głosów dają wyraźny ruch
+  całego klastra przy zachowaniu różnych pozycji poszczególnych atomów.
+  Na ścieżce z sygnałem mono wybierz wariant mono-in → stereo-out.
 - **MODE** — kliknięcie przełącza SHARP / SMOOTH. Przytrzymanie około sekundy
   przełącza pełną / wyrównaną dynamikę. SHARP = puls, SMOOTH = płynność.
 - **Footswitch** — bypass; dwa kliknięcia ustawiają również tap tempo.
 - Środkowy przycisk myszy — tap tempo bez przełączania bypassu.
 - Prawy przycisk — dynamika, włączenie tap tempo, synchronizacja do tempa hosta
-  i podział rytmiczny, wzór atomów oraz szerokość stereo. Obrót SPEED wyłącza synchronizację do hosta.
+  i podział rytmiczny, wzór atomów oraz szerokość stereo. W BPM SYNC obrót SPEED zmienia podział, zachowując synchronizację.
 - Gałki: przeciąganie w pionie; Shift pozwala regulować dokładniej.
 
 Wszystkie parametry, również dynamika i ustawienia tap/sync, zapisują się w projekcie.
@@ -65,9 +73,12 @@ SPEED żąda kroku od około 2,67 ms do 2 s, z rozdzielczością 256 próbek.
 Przy bardzo szybkim SPEED impulsy zlewają się w barwę. Zakresy i arpeggiator są
 wyborem tej implementacji; nie pochodzą z pomiaru oryginalnego urządzenia.
 
-Mono i stereo, obliczenia wejścia/wyjścia 32/64-bit, sample rate 8–384 kHz.
+Mono-in → stereo-out, mono-in → mono-out i stereo-in → stereo-out; obliczenia wejścia/wyjścia 32/64-bit, sample rate 8–384 kHz.
 Oryginalna kostka jest mono; stereo, ARP/RANDOM i host sync są rozszerzeniami tej wtyczki.
-Na szynie mono host otrzymuje sumę L/R; do ruchu stereo wybierz szynę stereo.
+Na wyjściu mono host otrzymuje sumę L/R; do ruchu stereo potrzebne jest wyjście stereo.
+Host przekazuje BPM i pozycję muzyczną. Gdy przekazuje tylko BPM, działa zegar
+rytmiczny bez siatki pozycji; bez tempa używane jest 120 BPM. Podczas odtwarzania
+siatka uwzględnia zgłoszoną latencję, zmianę tempa i skoki pozycji.
 Zgłaszana latencja wynosi 2048 próbek, czyli około 42,7 ms przy 48 kHz.
 Host może kompensować ją w projekcie, ale jest słyszalna przy grze na żywo.
 

@@ -67,8 +67,18 @@ int main(int argc, char** argv) try {
     click(child,112,503); check(c->getParamNormalized(Motion)==0,"visible CLUSTER button");
     const double previousWidth=c->getParamNormalized(Stereo);
     click(child,210,474); check(c->getParamNormalized(Stereo)!=previousWidth,"visible stereo control");
+    click(child,110,474); check(c->getParamNormalized(Stereo)==0,"stereo off toggle");
+    click(child,110,474); check(c->getParamNormalized(Stereo)==1,"stereo on toggle");
+    click(child,112,290); check(c->getParamNormalized(Sync)==1,"visible BPM SYNC switch");
+    const double oldDivision=c->getParamNormalized(Division);
+    SendMessage(child,WM_LBUTTONDOWN,MK_LBUTTON,MAKELPARAM(112,361));
+    SendMessage(child,WM_MOUSEMOVE,MK_LBUTTON,MAKELPARAM(112,311));
+    SendMessage(child,WM_LBUTTONUP,0,MAKELPARAM(112,311));
+    check(c->getParamNormalized(Sync)==1 && c->getParamNormalized(Division)!=oldDivision,"SPEED edits division while sync stays enabled");
+    const double nextDivision=c->getParamNormalized(Division);
+    click(child,308,290); check(c->getParamNormalized(Division)!=nextDivision,"visible note division button");
     if (argc >= 3) screenshot(child, argv[2]);
     check(view->removed() == kResultOk, "detach GUI"); view->release(); DestroyWindow(parent);
     c->terminate(); c->release(); factory->release(); check(exit(), "unload module"); FreeLibrary(module);
-    std::cout << "10 Windows GUI checks passed\n"; return 0;
+    std::cout << "15 Windows GUI checks passed\n"; return 0;
 } catch (const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }

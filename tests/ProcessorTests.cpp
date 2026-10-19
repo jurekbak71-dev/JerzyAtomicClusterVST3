@@ -2,6 +2,7 @@
 #include "base/source/fstreamer.h"
 #include "public.sdk/source/common/memorystream.h"
 #include "public.sdk/source/vst/hosting/parameterchanges.h"
+#include "pluginterfaces/vst/ivstprocesscontext.h"
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -61,7 +62,8 @@ int main() try {
     SpeakerArrangement mono = SpeakerArr::kMono;
     check(p->setBusArrangements(&mono, 1, &mono, 1) == kResultOk, "mono support");
     auto stereo = SpeakerArr::kStereo;
-    check(p->setBusArrangements(&mono, 1, &stereo, 1) == kResultFalse, "reject mismatched layouts");
+    check(p->setBusArrangements(&mono, 1, &stereo, 1) == kResultOk, "mono input to stereo output support");
+    check(p->setBusArrangements(&stereo,1,&mono,1)==kResultFalse,"reject unsupported stereo downmix layout");
     check(p->setBusArrangements(&stereo, 1, &stereo, 1) == kResultOk, "stereo support"); ++passed;
     check(p->setActive(true) == kResultOk, "activation");
     std::array<float, 128> left{}, right{}, outL{}, outR{};
@@ -88,7 +90,32 @@ int main() try {
     restore.join(); check(finite, "concurrent restore produces finite audio"); ++passed;
     data.numSamples = 0; data.numOutputs = data.numInputs = 0; data.inputs = data.outputs = nullptr;
     check(p->process(data) == kResultOk, "zero sample parameter flush"); ++passed;
-    p->setActive(false); p->terminate(); c.terminate();
+    p->setActive(false);
+    {
+        auto patch=defaults(); patch[Sync]=1; patch[Division]=0; patch[Atoms]=0; patch[Stereo]=1;
+        MemoryStream s; state(s,patch); check(p->setState(&s)==kResultOk,"restore stereo sync probe");
+        check(p->setBusArrangements(&mono,1,&stereo,1)==kResultOk,"negotiate real mono to stereo processor");
+        p->setActive(true); in.numChannels=1;
+        data.numSamples=128; data.numInputs=data.numOutputs=1; data.inputs=&in; data.outputs=&out;
+        ProcessContext context{}; context.state=ProcessContext::kPlaying|ProcessContext::kTempoValid|ProcessContext::kProjectTimeMusicValid;
+        context.sampleRate=48000; context.tempo=120; data.processContext=&context;
+        double side=0,energy=0; int gridChecks=0;
+        for(int pos=0;pos<96000;pos+=128) {
+            context.projectTimeMusic=.37+pos/24000.;
+            for(int i=0;i<128;++i) left[i]=float(.15*std::sin(2*pi*220*(pos+i)/48000.));
+            p->process(data);
+            for(int i=0;i<128;++i) {
+                side+=(outL[i]-outR[i])*(outL[i]-outR[i]); energy+=outL[i]*outL[i]+outR[i]*outR[i];
+                if(pos+i>12000 && (pos+i-fftSize-3120)%6000==0) {
+                    check(std::abs(outL[i])+std::abs(outR[i])<1e-6,"host musical grid must include reported latency"); ++gridChecks;
+                }
+            }
+        }
+        check(energy>10 && side/energy>.1,"mono host input must render a distinct stereo output"); ++passed;
+        check(gridChecks>10,"exercise host context beat grid across processing blocks"); ++passed;
+        p->setActive(false);
+    }
+    p->terminate(); c.terminate();
     std::cout << passed << " processor/state checks passed\n";
     return 0;
 } catch (const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }

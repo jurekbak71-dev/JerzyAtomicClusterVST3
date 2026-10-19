@@ -32,8 +32,10 @@ class PedalEditor final : public CPluginView {
     double value(int id) { return controller->getParamNormalized(id); }
     void change(int id, double v, bool gesture = true) {
         if (gesture) controller->beginEdit(id);
-        controller->setParamNormalized(id, clean(v));
-        controller->performEdit(id, clean(v));
+        v=clean(v);
+        if(id==Division) v=std::round(v*4)/4.;
+        controller->setParamNormalized(id, v);
+        controller->performEdit(id, v);
         if (gesture) controller->endEdit(id);
         InvalidateRect(window, nullptr, FALSE);
     }
@@ -58,7 +60,7 @@ class PedalEditor final : public CPluginView {
         ellipse(dc, x, y, 54, RGB(129, 130, 139));
         ellipse(dc, x, y - 1, 49, RGB(214, 213, 210));
         ellipse(dc, x - 1, y - 3, 44, RGB(250, 248, 240));
-        double angle = (-225 + value(id) * 270) * pi / 180;
+        double angle = (-225 + (id==Speed && value(Sync)>=.5 ? value(Division) : value(id)) * 270) * pi / 180;
         auto pen = CreatePen(PS_SOLID, 4, RGB(45, 27, 28)); auto old = SelectObject(dc, pen);
         MoveToEx(dc, x + int(std::cos(angle) * 23), y + int(std::sin(angle) * 23), nullptr);
         LineTo(dc, x + int(std::cos(angle) * 37), y + int(std::sin(angle) * 37));
@@ -66,6 +68,7 @@ class PedalEditor final : public CPluginView {
         text(dc, y + 59, label, 20, RGB(250, 246, 235), x - 70, 140);
         Vst::String128 display{}; controller->getParamStringByValue(id, value(id), display);
         char ascii[128]{}; for (int i = 0; i < 127 && display[i]; ++i) ascii[i] = char(display[i]);
+        if(id==Speed && value(Sync)>=.5) std::snprintf(ascii,sizeof(ascii),"%s",divisionLabel(value(Division)));
         text(dc, y + 84, ascii, 13, RGB(192, 181, 206), x - 75, 150);
     }
     void paint() {
@@ -91,10 +94,18 @@ class PedalEditor final : public CPluginView {
         ellipse(dc, 210, 272, 22, on ? (smooth ? RGB(27, 95, 55) : RGB(122, 19, 26)) : RGB(30, 24, 37));
         ellipse(dc, 210, 272, 13, on ? (smooth ? RGB(131, 255, 159) : RGB(255, 224, 185)) : RGB(58, 52, 63));
         text(dc, 297, on ? (smooth ? "SMOOTH" : "SHARP") : "BYPASS", 13);
-        char spatial[100]{};
-        std::snprintf(spatial,sizeof(spatial),"STEREO %.0f%%   |   %s DYNAMICS",value(Stereo)*100,value(Flat)>=.5 ? "FLAT" : "FULL");
-        fill(dc,65,464,290,22,RGB(47,32,79),6);
-        text(dc,466,spatial,11,RGB(219,208,234));
+        const bool sync=value(Sync)>=.5;
+        fill(dc,65,278,100,25,sync ? RGB(210,152,30):RGB(47,32,79),6);
+        text(dc,283,sync ? "BPM SYNC":"FREE",12,sync ? RGB(24,15,45):RGB(240,228,248),65,100);
+        fill(dc,259,278,100,25,RGB(47,32,79),6);
+        text(dc,283,divisionLabel(value(Division)),12,RGB(240,228,248),259,100);
+        const bool stereo=value(Stereo)>.001;
+        fill(dc,65,464,106,22,stereo ? RGB(210,152,30):RGB(47,32,79),6);
+        text(dc,468,stereo ? "STEREO ON":"STEREO OFF",11,stereo ? RGB(24,15,45):RGB(240,228,248),65,106);
+        fill(dc,179,464,176,22,RGB(47,32,79),6);
+        fill(dc,179,464,int(176*value(Stereo)),22,RGB(124,84,35),6);
+        char spatial[64]{}; std::snprintf(spatial,sizeof(spatial),"WIDTH %.0f%%  /  %s",value(Stereo)*100,value(Flat)>=.5 ? "FLAT":"FULL");
+        text(dc,468,spatial,11,RGB(240,228,248),179,176);
         // Original Jerzy branding with the pedal's purple/yellow visual vocabulary.
         auto pen = CreatePen(PS_SOLID, 3, RGB(249, 187, 36)); auto op = SelectObject(dc, pen);
         auto ob = SelectObject(dc, GetStockObject(NULL_BRUSH));
@@ -125,7 +136,7 @@ class PedalEditor final : public CPluginView {
         AppendMenuA(m, MF_STRING | (value(Sync) >= .5 ? MF_CHECKED : 0), 2, "Sync to host tempo");
         AppendMenuA(m, MF_STRING | (value(TapEnabled) >= .5 ? MF_CHECKED : 0), 3, "Tap tempo enabled");
         AppendMenuA(m, MF_SEPARATOR, 0, nullptr);
-        const char* names[]{"1/16 beat", "1/8 beat", "1/4 beat", "1/2 beat", "1 bar"};
+        const char* names[]{"1/16 note", "1/8 note", "1/4 note", "1/2 note", "1 bar"};
         for (int i = 0; i < 5; ++i) AppendMenuA(m, MF_STRING | (int(std::round(value(Division) * 4)) == i ? MF_CHECKED : 0), 10 + i, names[i]);
         AppendMenuA(m,MF_SEPARATOR,0,nullptr);
         const char* patterns[]{"Pattern: Cluster", "Pattern: Arpeggio", "Pattern: Random harmonic"};
@@ -153,10 +164,17 @@ class PedalEditor final : public CPluginView {
         case WM_LBUTTONDOWN: {
             SetFocus(window);
             if(y>=490 && y<=517 && x>=65 && x<359) { change(Motion,std::clamp((x-65)/98,0,2)*.5); return 0; }
-            if(y>=462 && y<486) { change(Stereo,value(Stereo)<.25 ? .5 : value(Stereo)<.75 ? 1 : 0); return 0; }
+            if(y>=278 && y<303 && x>=65 && x<165) { change(Sync,value(Sync)<.5 ? 1:0); return 0; }
+            if(y>=278 && y<303 && x>=259 && x<359) { change(Division,std::fmod(std::round(value(Division)*4)+1,5.)/4.); return 0; }
+            if(y>=462 && y<486 && x>=65 && x<171) { change(Stereo,value(Stereo)>.001 ? 0:1); return 0; }
+            if(y>=462 && y<486 && x>=179 && x<355) {
+                drag=Stereo; controller->beginEdit(Stereo); SetCapture(window);
+                change(Stereo,(x-179)/175.,false); return 0;
+            }
             const int xs[]{112, 308, 112, 308}, ys[]{167, 167, 361, 361};
             for (int i = 0; i < 4; ++i) if (std::hypot(double(x - xs[i]), double(y - ys[i])) < 55) {
-                drag = i; startY = y; startValue = value(i); controller->beginEdit(i); SetCapture(window); return 0;
+                drag = i==Speed && value(Sync)>=.5 ? Division:i;
+                startY = y; startValue = value(drag); controller->beginEdit(drag); SetCapture(window); return 0;
             }
             if (std::hypot(double(x - 210), double(y - 55)) < 27) { modeDown = GetTickCount64(); modeHeld = false; SetCapture(window); }
             if (std::hypot(double(x - 210), double(y - 665)) < 50) { change(Bypass, value(Bypass) < .5 ? 1 : 0); tap(); }
@@ -165,8 +183,8 @@ class PedalEditor final : public CPluginView {
         case WM_MOUSEMOVE:
             if (drag >= 0) {
                 double scale = (wp & MK_SHIFT) ? .0005 : .005;
-                change(drag, startValue + (startY - y) * scale, false);
-                if (drag == Speed) change(Sync, 0);
+                if(drag==Stereo) change(Stereo,(x-179)/175.,false);
+                else change(drag, startValue + (startY - y) * scale, false);
             }
             return 0;
         case WM_LBUTTONUP:

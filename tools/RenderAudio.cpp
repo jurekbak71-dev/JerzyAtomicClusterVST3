@@ -2,6 +2,7 @@
 #include "Plugin.h"
 #include "base/source/fstreamer.h"
 #include "public.sdk/source/common/memorystream.h"
+#include "pluginterfaces/vst/ivstprocesscontext.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -22,7 +23,7 @@ static void check(bool c, const char* s) { if (!c) throw std::runtime_error(s); 
 template<class T> static T read(std::istream& f) { T x{}; f.read(reinterpret_cast<char*>(&x), sizeof(x)); check(bool(f), "truncated WAV"); return x; }
 template<class T> static void write(std::ostream& f, T x) { f.write(reinterpret_cast<const char*>(&x), sizeof(x)); }
 int main(int argc, char** argv) try {
-    check((argc == 10 || argc == 12), "render_audio plugin input.wav output.wav volume blend period_ms atoms smooth flat [pattern stereo]");
+    check((argc == 10 || argc == 12 || argc == 15), "render_audio plugin input.wav output.wav volume blend period_ms atoms smooth flat [pattern stereo [bpm division mono_input]]");
     std::ifstream file(argv[2], std::ios::binary); check(bool(file), "open source WAV");
     char tag[4]; file.read(tag, 4); check(std::memcmp(tag,"RIFF",4)==0,"RIFF input");
     read<uint32_t>(file); file.read(tag,4); check(std::memcmp(tag,"WAVE",4)==0,"WAVE input");
@@ -58,14 +59,19 @@ int main(int argc, char** argv) try {
     check(component->queryInterface(IAudioProcessor::iid,reinterpret_cast<void**>(&processor))==kResultOk,"audio processor interface");
     auto p=defaults(); p[Volume]=std::stod(argv[4]); p[Blend]=std::stod(argv[5]);
     p[Speed]=std::log(std::stod(argv[6])/2000.)/std::log(1./750.);
-    p[Atoms]=std::log(std::stod(argv[7]))/std::log(argc==12 ? 64. : 1023.); p[Smooth]=std::stod(argv[8]); p[Flat]=std::stod(argv[9]);
-    if(argc==12) { p[Motion]=std::stod(argv[10]); p[Stereo]=std::stod(argv[11]); }
+    p[Atoms]=std::log(std::stod(argv[7]))/std::log(argc>=12 ? 64. : 1023.); p[Smooth]=std::stod(argv[8]); p[Flat]=std::stod(argv[9]);
+    if(argc>=12) { p[Motion]=std::stod(argv[10]); p[Stereo]=std::stod(argv[11]); }
+    const double hostBpm=argc==15 ? std::stod(argv[12]):0;
+    const bool monoInput=argc==15 && std::stod(argv[14])>=.5;
+    if(argc==15) { p[Sync]=hostBpm>0 ? 1:0; p[Division]=std::stod(argv[13]); }
+    check(std::isfinite(hostBpm) && hostBpm>=0 && hostBpm<=400,"host BPM range");
+    if(monoInput) check(channels==1,"mono-input probe requires a mono source");
     for(auto v:p) check(std::isfinite(v) && v>=0 && v<=1,"parameter range");
-    MemoryStream state; IBStreamer s(&state,kLittleEndian); s.writeInt32(0x4A414331); s.writeInt32(argc==12 ? 2:1);
-    for(int i=0;i<(argc==12 ? NumParams:10);++i) s.writeDouble(p[i]); state.seek(0,IBStream::kIBSeekSet,nullptr);
+    MemoryStream state; IBStreamer s(&state,kLittleEndian); s.writeInt32(0x4A414331); s.writeInt32(argc>=12 ? 2:1);
+    for(int i=0;i<(argc>=12 ? NumParams:10);++i) s.writeDouble(p[i]); state.seek(0,IBStream::kIBSeekSet,nullptr);
     check(component->setState(&state)==kResultOk,"restore requested preset");
-    SpeakerArrangement layout=SpeakerArr::kStereo;
-    check(processor->setBusArrangements(&layout,1,&layout,1)==kResultOk,"stereo buses");
+    SpeakerArrangement layout=SpeakerArr::kStereo, inputLayout=monoInput ? SpeakerArr::kMono:SpeakerArr::kStereo;
+    check(processor->setBusArrangements(&inputLayout,1,&layout,1)==kResultOk,"requested input to stereo buses");
     ProcessSetup setup{}; setup.sampleRate=sr; setup.maxSamplesPerBlock=256; setup.symbolicSampleSize=kSample32; setup.processMode=kOffline;
     check(processor->setupProcessing(setup)==kResultOk,"offline processing setup");
     component->activateBus(kAudio,kInput,0,true); component->activateBus(kAudio,kOutput,0,true);
@@ -74,8 +80,11 @@ int main(int argc, char** argv) try {
     const size_t frames=inputFrames+sr*3, total=frames+latency;
     std::vector<float> result(frames*2); std::array<float,256> l{},r{},ol{},orr{};
     float* ins[]{l.data(),r.data()}; float* outs[]{ol.data(),orr.data()};
-    AudioBusBuffers in{},out{}; in.numChannels=out.numChannels=2; in.channelBuffers32=ins; out.channelBuffers32=outs;
+    AudioBusBuffers in{},out{}; in.numChannels=monoInput ? 1:2; out.numChannels=2; in.channelBuffers32=ins; out.channelBuffers32=outs;
     ProcessData data{}; data.processMode=kOffline; data.symbolicSampleSize=kSample32; data.numInputs=data.numOutputs=1; data.inputs=&in; data.outputs=&out;
+    ProcessContext context{}; context.sampleRate=sr; context.tempo=hostBpm;
+    context.state=ProcessContext::kPlaying|ProcessContext::kTempoValid|ProcessContext::kProjectTimeMusicValid;
+    if(hostBpm>0) data.processContext=&context;
     double peak=0, energy=0;
     for(size_t pos=0;pos<total;pos+=256) {
         const int n=int(std::min(size_t(256),total-pos));
@@ -83,6 +92,8 @@ int main(int argc, char** argv) try {
             const auto f=pos+i; l[i]=f<inputFrames?pcm[f*channels]/32768.f:0;
             r[i]=f<inputFrames?pcm[f*channels+(channels==2?1:0)]/32768.f:0;
         }
+        context.projectTimeSamples=static_cast<TSamples>(pos);
+        context.projectTimeMusic=pos*hostBpm/(60.*sr);
         in.silenceFlags=0; out.silenceFlags=0; data.numSamples=n;
         check(processor->process(data)==kResultOk,"render VST3 audio");
         for(int i=0;i<n;++i) if(pos+i>=latency) {

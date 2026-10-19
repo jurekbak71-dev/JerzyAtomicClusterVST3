@@ -33,7 +33,7 @@ Processor::Processor() {
     setControllerClass(controllerId);
     auto initial = defaults();
     for (int i = 0; i < NumParams; ++i) values[i].store(initial[i]);
-    processContextRequirements.needTempo();
+    processContextRequirements.needTempo().needProjectTimeMusic().needTransportState();
 }
 tresult PLUGIN_API Processor::initialize(FUnknown* host) {
     auto result = AudioEffect::initialize(host);
@@ -43,8 +43,10 @@ tresult PLUGIN_API Processor::initialize(FUnknown* host) {
     return kResultOk;
 }
 tresult PLUGIN_API Processor::setBusArrangements(SpeakerArrangement* ins, int32 ni, SpeakerArrangement* outs, int32 no) {
-    if (ni != 1 || no != 1 || !ins || !outs || ins[0] != outs[0] ||
-        (ins[0] != SpeakerArr::kMono && ins[0] != SpeakerArr::kStereo)) return kResultFalse;
+    if (ni != 1 || no != 1 || !ins || !outs ||
+        (ins[0] != SpeakerArr::kMono && ins[0] != SpeakerArr::kStereo) ||
+        (outs[0] != SpeakerArr::kMono && outs[0] != SpeakerArr::kStereo) ||
+        (ins[0] == SpeakerArr::kStereo && outs[0] == SpeakerArr::kMono)) return kResultFalse;
     getAudioInput(0)->setArrangement(ins[0]);
     getAudioOutput(0)->setArrangement(outs[0]);
     return kResultOk;
@@ -103,6 +105,11 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
     double bpm = 120;
     if (data.processContext && (data.processContext->state & ProcessContext::kTempoValid) && std::isfinite(data.processContext->tempo))
         bpm = data.processContext->tempo;
+    const bool musicalClock = data.processContext &&
+        (data.processContext->state & ProcessContext::kProjectTimeMusicValid) &&
+        (data.processContext->state & ProcessContext::kPlaying) &&
+        std::isfinite(data.processContext->projectTimeMusic);
+    const double beatIncrement = std::clamp(bpm,20.,400.)/(60.*processSetup.sampleRate);
     out.silenceFlags = 0;
     for (int32 i = 0; i < data.numSamples; ++i) {
         apply(i);
@@ -114,7 +121,8 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
                 if (data.symbolicSampleSize == kSample64 && in->channelBuffers64 && in->channelBuffers64[channel]) input[c] = in->channelBuffers64[channel][i];
             }
         }
-        auto y = engine.process(input[0], input[1], p, bpm);
+        const double beat = musicalClock ? data.processContext->projectTimeMusic+(i-fftSize)*beatIncrement : NAN;
+        auto y = engine.process(input[0], input[1], p, bpm, beat);
         if(out.numChannels==1) y[0]=(y[0]+y[1])*.5;
         for (int c = 0; c < out.numChannels; ++c) {
             if (data.symbolicSampleSize == kSample32 && out.channelBuffers32 && out.channelBuffers32[c]) out.channelBuffers32[c][i] = static_cast<float>(y[c]);
