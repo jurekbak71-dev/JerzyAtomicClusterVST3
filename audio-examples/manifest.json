@@ -1,0 +1,78 @@
+{
+  "plugin_version": "0.1.0",
+  "host": "Actual Windows VST3 loaded under Wine",
+  "sample_rate": 48000,
+  "duration_seconds": 12,
+  "latency_compensated_samples": 2048,
+  "source": "Original synthetic plucked-string phrase, seed 71; not a real guitar recording",
+  "post_processing": "PCM16 quantization and MP3 encoding only; no per-file normalization",
+  "files": [
+    {
+      "name": "00_dry",
+      "volume_linear": 1,
+      "blend": 0,
+      "refresh_ms": 27.1,
+      "atoms": 23,
+      "smooth": false,
+      "flat": false,
+      "peak_dbfs": -6.94,
+      "wav_sha256": "65001f3680d30cc9f427219fb51cc3a2febf700810fc9a7498707b3bb7e7ba08"
+    },
+    {
+      "name": "01_single_atom",
+      "volume_linear": 1,
+      "blend": 1,
+      "refresh_ms": 125,
+      "atoms": 1,
+      "smooth": false,
+      "flat": false,
+      "peak_dbfs": -18.37,
+      "wav_sha256": "c04ab8e78bfa60152268a5275df68ce6682cc32f174bab160d698ba4fac47e11"
+    },
+    {
+      "name": "02_rhythmic_glitch",
+      "volume_linear": 1,
+      "blend": 0.85,
+      "refresh_ms": 250,
+      "atoms": 6,
+      "smooth": false,
+      "flat": false,
+      "peak_dbfs": -10.96,
+      "wav_sha256": "7dd143ddf49812005431d55f00d658b4ba170f0f903258a34e49e7bdf8b23ad0"
+    },
+    {
+      "name": "03_smooth_pad",
+      "volume_linear": 1,
+      "blend": 1,
+      "refresh_ms": 600,
+      "atoms": 32,
+      "smooth": true,
+      "flat": false,
+      "peak_dbfs": -10.32,
+      "wav_sha256": "e9906e4dc7eaa3df5d65dc09a994af9c94ec5d35d509a472e1777b890e95cb4e"
+    },
+    {
+      "name": "04_flat_robot",
+      "volume_linear": 1,
+      "blend": 1,
+      "refresh_ms": 70,
+      "atoms": 4,
+      "smooth": false,
+      "flat": true,
+      "peak_dbfs": -11.25,
+      "wav_sha256": "3fc17dfbd6378c71d895672f50af3910705ee2db64288b8c713231c6b1bc39af"
+    },
+    {
+      "name": "05_dense_spectrum",
+      "volume_linear": 1,
+      "blend": 1,
+      "refresh_ms": 12,
+      "atoms": 256,
+      "smooth": true,
+      "flat": false,
+      "peak_dbfs": -10.88,
+      "wav_sha256": "5f3dab53c7ffbf9902f74be7b246056fd714d9f632994646b2cd1697b02fe410"
+    }
+  ],
+  "plugin_sha256": "26239ffb760ac207af659cd90c12c094999121dd950733055da3db706e167518"
+}

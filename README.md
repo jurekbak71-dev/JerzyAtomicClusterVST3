@@ -6,6 +6,8 @@ nie jest to oficjalna wtyczka EHX ani potwierdzona kopia brzmienia kostki.
 
 [Pobierz Windows VST3 0.1.0](releases/0.1.0/JerzyAtomicClusterVST3-Win64.zip)
 
+[Pięć przykładów brzmienia — MP3 i WAV](audio-examples/README.md)
+
 ## Instalacja w Windows / FL Studio
 
 1. Rozpakuj `JerzyAtomicClusterVST3-Win64.zip`.

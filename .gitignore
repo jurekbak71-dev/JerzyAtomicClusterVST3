@@ -3,3 +3,4 @@
 /dependencies/
 /.vs/
 *.user
+/audio-examples/*.wav
