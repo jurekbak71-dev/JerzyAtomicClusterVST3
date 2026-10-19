@@ -14,6 +14,20 @@ brzmieniowe do odsłuchu, nie odtworzenie dokładnych ustawień urządzenia.
 | [04 — rytmiczny robot](04_flat_glitch.mp3) | SHARP + FLAT | 3 | 300 ms | 100% |
 | [05 — szybki, gęsty klaster](05_fast_cluster.mp3) | SMOOTH | 48 | 28 ms | 90% |
 
+## Odsłuch porównawczy
+
+[Jedno nagranie: wejście + pięć ustawień](comparison.mp3), 1 min 16 s.
+Ta sama fraza w każdym fragmencie; bez wyrównywania głośności.
+
+| Początek | Fragment |
+|---|---|
+| 0:00 | Sygnał wejściowy bez efektu |
+| 0:12,75 | SHARP — rzadkie tony |
+| 0:25,50 | SMOOTH — długie podtrzymanie |
+| 0:38,25 | SMOOTH — płynne akordy |
+| 0:51 | FLAT — rytmiczny robot |
+| 1:03,75 | Szybki klaster |
+
 [Wszystkie próbki MP3 w jednym ZIP-ie](JerzyAtomicCluster-0.1.2-examples.zip).
 Przy wolnym odświeżaniu SMOOTH stopniowo przenika pomiędzy przechwyconymi
 widmami; w SHARP zmiany są wyraźne i rytmiczne. Do pierwszych eksperymentów
