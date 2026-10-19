@@ -43,6 +43,8 @@ class SpectralChannel {
     std::array<double, fftSize> input{}, window{};
     std::array<double, fftSize * 4> output{};
     std::array<double, bins> previousPhase{}, phase{}, delta{}, target{}, magnitude{}, heldDelta{};
+    std::array<double, bins> relativePhase{};
+    std::array<int, bins> owner{};
     std::array<std::complex<double>, fftSize> spectrum{};
     std::array<int, bins - 2> rank{};
     uint64_t cursor = 0;
@@ -66,17 +68,50 @@ class SpectralChannel {
         }
         if (refresh) {
             target.fill(0);
-            for (int i = 0; i < bins - 2; ++i) rank[i] = i + 1;
+            owner.fill(-1);
             const int count = atomCount(p[Atoms]);
-            std::partial_sort(rank.begin(), rank.begin() + count, rank.end(), [this](int a, int b) {
+            int candidates = 0;
+            double strongest = 0;
+            for (int k = 1; k < bins - 1; ++k) strongest = std::max(strongest, std::norm(spectrum[k]));
+            // Count independent local maxima, not neighboring bins of one
+            // Hann-windowed partial. Ignore peaks >60 dB below the strongest.
+            for (int k = 1; k < bins - 1; ++k) {
+                const double m = std::norm(spectrum[k]);
+                if (m > 1e-24 && m >= strongest * 1e-6 && m > std::norm(spectrum[k-1]) && m >= std::norm(spectrum[k+1]))
+                    rank[candidates++] = k;
+            }
+            const int selected = std::min(count, candidates);
+            std::partial_sort(rank.begin(), rank.begin() + selected, rank.begin() + candidates, [this](int a, int b) {
                 return std::norm(spectrum[a]) > std::norm(spectrum[b]);
             });
             double energy = 0;
-            for (int i = 0; i < count; ++i) energy += std::norm(spectrum[rank[i]]);
-            const double equal = std::sqrt(energy / count);
-            for (int i = 0; i < count; ++i) {
-                int k = rank[i];
-                target[k] = p[Flat] >= .5 ? equal : std::abs(spectrum[k]);
+            for (int i = 0; i < selected; ++i) {
+                energy += std::norm(spectrum[rank[i]]);
+                owner[rank[i]] = rank[i];
+            }
+            const double equal = selected ? std::sqrt(energy / selected) : 0;
+            for (int i = 0; i < selected; ++i) {
+                const int center = rank[i];
+                for (int k = std::max(1, center-2); k <= std::min(bins-2, center+2); ++k)
+                    if (owner[k] < 0) owner[k] = center;
+                if (first) {
+                    const double l = std::log(std::max(1e-20, std::abs(spectrum[center-1])));
+                    const double m = std::log(std::max(1e-20, std::abs(spectrum[center])));
+                    const double r = std::log(std::max(1e-20, std::abs(spectrum[center+1])));
+                    const double fraction = std::clamp(.5*(l-r)/(l-2*m+r), -.5, .5);
+                    delta[center] = 2*pi*(center+fraction)*hopSize/fftSize;
+                }
+            }
+            for (int k = 1; k < bins-1; ++k) {
+                if (count == bins-2 && p[Flat] < .5) {
+                    // Keep the documented full-resolution, full-dynamics end stop.
+                    owner[k] = k; relativePhase[k] = 0; target[k] = std::abs(spectrum[k]);
+                } else if (owner[k] >= 0) {
+                    const int center = owner[k];
+                    const double scale = p[Flat] >= .5 ? equal/std::max(1e-20,std::abs(spectrum[center])) : 1.;
+                    target[k] = std::abs(spectrum[k])*scale;
+                    relativePhase[k] = wrap(previousPhase[k]-previousPhase[center]);
+                }
             }
             heldDelta = delta;
             untilRefresh += std::max(double(hopSize), seconds * sampleRate);
@@ -88,8 +123,11 @@ class SpectralChannel {
             if (magnitude[k] < 1e-15) magnitude[k] = 0;
             if (first || (refresh && p[Smooth] < .5)) phase[k] = previousPhase[k];
             else phase[k] = wrap(phase[k] + heldDelta[k]);
-            spectrum[k] = std::polar(magnitude[k], phase[k]);
         }
+        // Phase-lock each selected partial's window lobes to its center.
+        for (int k = 1; k < bins-1; ++k)
+            if (owner[k] >= 0 && owner[k] != k) phase[k] = wrap(phase[owner[k]]+relativePhase[k]);
+        for (int k = 0; k < bins; ++k) spectrum[k] = std::polar(magnitude[k], phase[k]);
         spectrum[0] = spectrum[fftSize / 2] = 0.;
         for (int k = 1; k < fftSize / 2; ++k) spectrum[fftSize - k] = std::conj(spectrum[k]);
         fft(spectrum, true);
@@ -103,6 +141,7 @@ public:
     void reset(double sr) {
         input.fill(0); output.fill(0); previousPhase.fill(0); phase.fill(0);
         target.fill(0); magnitude.fill(0); heldDelta.fill(0); delta.fill(0);
+        owner.fill(-1); relativePhase.fill(0);
         cursor = 0; untilRefresh = 0; first = true; sampleRate = sr;
     }
     // Returns aligned dry/wet samples, both delayed by fftSize samples.

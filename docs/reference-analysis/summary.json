@@ -1,0 +1,77 @@
+{
+  "duration_seconds": 385.6333333333333,
+  "sample_rate_analysis": 22050,
+  "fft_size": 4096,
+  "hop_samples": 256,
+  "window_seconds": 0.18575963718820862,
+  "hop_seconds": 0.011609977324263039,
+  "frequency_bin_hz": 5.38330078125,
+  "input_peak_dbfs": -1.1726458072662354,
+  "active_frame_fraction": 0.9181024096385542,
+  "last_active_frame_seconds": 355.2536961451247,
+  "stereo_correlation": 0.9998140590925043,
+  "selected_sections": {
+    "fewest_spectral_peaks": {
+      "start": 25.0,
+      "end": 40.0,
+      "active_fraction": 1.0,
+      "median_spectral_peaks": 4.0,
+      "median_effective_bins": 11.115828514099121,
+      "median_top5_energy": 0.6802901029586792,
+      "flux_median": 0.0029522180557250977,
+      "flux_p95": 0.013096943497657778,
+      "level_range_db": 0.7599649429321289
+    },
+    "highest_concentration": {
+      "start": 55.0,
+      "end": 70.0,
+      "active_fraction": 1.0,
+      "median_spectral_peaks": 4.0,
+      "median_effective_bins": 9.957658767700195,
+      "median_top5_energy": 0.7153910398483276,
+      "flux_median": 0.0012855827808380127,
+      "flux_p95": 0.008152958750724795,
+      "level_range_db": 2.160637855529785
+    },
+    "richest_spectrum": {
+      "start": 325.0,
+      "end": 340.0,
+      "active_fraction": 1.0,
+      "median_spectral_peaks": 43.0,
+      "median_effective_bins": 86.89027404785156,
+      "median_top5_energy": 0.22414201498031616,
+      "flux_median": 0.005108237266540527,
+      "flux_p95": 0.013476651906967164,
+      "level_range_db": 1.371490478515625
+    },
+    "largest_fast_changes": {
+      "start": 160.0,
+      "end": 175.0,
+      "active_fraction": 1.0,
+      "median_spectral_peaks": 25.0,
+      "median_effective_bins": 50.545833587646484,
+      "median_top5_energy": 0.3621166944503784,
+      "flux_median": 0.009698241949081421,
+      "flux_p95": 0.017295584082603458,
+      "level_range_db": 1.8264884948730469
+    },
+    "smallest_changes_with_multiple_peaks": {
+      "start": 105.0,
+      "end": 120.0,
+      "active_fraction": 1.0,
+      "median_spectral_peaks": 9.0,
+      "median_effective_bins": 14.465322494506836,
+      "median_top5_energy": 0.593437910079956,
+      "flux_median": 0.0004776418209075928,
+      "flux_p95": 0.0032408088445663456,
+      "level_range_db": 6.32601261138916
+    }
+  },
+  "limitations": [
+    "No knob positions or bypass markings available from MP3.",
+    "No paired isolated dry/wet input; this is not a measured transfer function.",
+    "Spectral peak counts are not a measurement of the pedal ATOMS knob.",
+    "Abrupt input note changes and edits can resemble algorithm refreshes.",
+    "Spectral concentration depends on instrument, blend, source and encoding."
+  ]
+}

@@ -1,0 +1,2 @@
+114173eafdcd4558cba840a9f3ad68a818d6b4f963599922c5c0f383e7079f57  JerzyAtomicCluster.vst3/Contents/x86_64-win/JerzyAtomicCluster.vst3
+2e8a7f81964666330a1e671728257d575e36e3e8972745cae18f7741d9bc5dde  JerzyAtomicClusterVST3-Win64.zip

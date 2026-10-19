@@ -185,7 +185,7 @@ bool InitModule() { return true; }
 bool DeinitModule() { return true; }
 BEGIN_FACTORY_DEF("Jerzy Audio", "https://github.com/jurekbak71-dev/JerzyAtomicClusterVST3", "")
 DEF_CLASS2(INLINE_UID_FROM_FUID(atomiccluster::processorId), PClassInfo::kManyInstances, kVstAudioEffectClass,
-    "Jerzy Atomic Cluster", Vst::kDistributable, "Fx|Filter", "0.1.0", kVstVersionString, atomiccluster::Processor::create)
+    "Jerzy Atomic Cluster", Vst::kDistributable, "Fx|Filter", ATOMIC_VERSION, kVstVersionString, atomiccluster::Processor::create)
 DEF_CLASS2(INLINE_UID_FROM_FUID(atomiccluster::controllerId), PClassInfo::kManyInstances, kVstComponentControllerClass,
-    "Jerzy Atomic Cluster Controller", 0, "", "0.1.0", kVstVersionString, atomiccluster::Controller::create)
+    "Jerzy Atomic Cluster Controller", 0, "", ATOMIC_VERSION, kVstVersionString, atomiccluster::Controller::create)
 END_FACTORY

@@ -25,7 +25,8 @@ done
 export DISPLAY=":$(cat "$display_file")"
 wine_run() { "$WINELOADER" "$@"; }
 python3 tools/package.py --build build-win
-wine_run "$PWD/build-win/bin/moduleinfotool.exe" -create -version 0.1.0 -path "$PWD/dist/JerzyAtomicCluster.vst3" -output "$PWD/dist/JerzyAtomicCluster.vst3/Contents/Resources/moduleinfo.json" >build-win/validation/moduleinfo.log 2>&1
+version=$(sed -n 's/^project(.* VERSION \([^ ]*\).*/\1/p' CMakeLists.txt)
+wine_run "$PWD/build-win/bin/moduleinfotool.exe" -create -version "$version" -path "$PWD/dist/JerzyAtomicCluster.vst3" -output "$PWD/dist/JerzyAtomicCluster.vst3/Contents/Resources/moduleinfo.json" >build-win/validation/moduleinfo.log 2>&1
 wine_run "$PWD/build-win/dsp_tests.exe" >build-win/validation/dsp.log 2>&1
 wine_run "$PWD/build-win/processor_tests.exe" >build-win/validation/processor.log 2>&1
 wine_run "$PWD/build-win/bin/validator.exe" "$PWD/dist/JerzyAtomicCluster.vst3" >build-win/validation/validator.log 2>&1

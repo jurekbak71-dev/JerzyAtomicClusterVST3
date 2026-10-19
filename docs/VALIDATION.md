@@ -1,4 +1,4 @@
-# Validation — 0.1.0
+# Validation — 0.1.1
 
 ## Verified in the cloud instance
 
@@ -8,10 +8,12 @@
 - Linux native VST3 validator: **47 passed, 0 failed**.
 - Linux CTest: **2 suites passed, 0 failed** (`dsp_regression`, `processor_state`).
 - Windows binaries executed under Wine 10.0 with an Xvfb display:
-  - **15 DSP checks passed**: FFT reconstruction, aligned dry/bypass,
+  - **18 DSP checks passed**: FFT reconstruction, aligned dry/bypass,
     stereo polarity, fundamental/harmonic retention at full resolution,
     weaker-tone rejection with one atom, finite output across several sample rates,
-    both transition modes, silence and recovery from invalid input.
+    both transition modes, silence and recovery from invalid input; two independent
+    partials retained with ATOMS=2 in Sharp and Smooth, and Flat equalization
+    of those partials.
   - **9 processor/state checks passed**: parameter IDs, all-control state restore,
     invalid/truncated state rejection without partial modification, mono/stereo,
     delayed bypass, automation persistence, concurrent restore while processing,
@@ -25,6 +27,14 @@
   without external GCC runtime DLL requirements.
 
 ## Diagnosed and corrected before packaging
+
+0.1.1 fixes selection of adjacent FFT bins as multiple atoms. A controlled
+440/880 Hz probe in the actual Linux VST3 changes the 880/440 output ratio
+from -120.32 dB in 0.1.0 to -7.9615 dB in 0.1.1, versus -7.9588 dB at input.
+This validates this regression, not equivalence to the EHX hardware.
+The uploaded reference recording was analyzed numerically; knob settings
+and an isolated paired dry input were not available. See
+`docs/reference-analysis/REPORT.md` for evidence and limits.
 
 The first flat-file Windows build loaded and passed its processing tests, but
 the current SDK validator rejected its bundle structure. Distribution now uses

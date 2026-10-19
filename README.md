@@ -1,12 +1,15 @@
-# Jerzy Atomic Cluster — VST3 0.1.0
+# Jerzy Atomic Cluster — VST3 0.1.1
 
 Eksperymentalny dekompozytor widma dla Windows x64, inspirowany zachowaniem
 EHX Pico Atomic Cluster opisanym w instrukcji producenta. Własny algorytm DSP;
 nie jest to oficjalna wtyczka EHX ani potwierdzona kopia brzmienia kostki.
 
-[Pobierz Windows VST3 0.1.0](releases/0.1.0/JerzyAtomicClusterVST3-Win64.zip)
+[Pobierz Windows VST3 0.1.1](releases/0.1.1/JerzyAtomicClusterVST3-Win64.zip)
 
 [Pięć przykładów brzmienia — MP3 i WAV](audio-examples/README.md)
+
+[Analiza materiału referencyjnego i poprawka ATOMS](docs/reference-analysis/REPORT.md)
+— przykłady powyżej pochodzą z wersji 0.1.0. W 0.1.1 zmieniła się selekcja składowych.
 
 ## Instalacja w Windows / FL Studio
 
@@ -38,9 +41,12 @@ Po niskim ustawieniu SPEED aktualizacja efektu może nastąpić dopiero w kolejn
 
 ## Zakres i ograniczenia
 
-Silnik analizuje okna 2048 próbek, zachowuje najsilniejsze składowe i resyntezuje
-widmo z podtrzymaniem fazy oraz nakładaniem okien. Parametr ATOMS obejmuje 1–1023
-składowe FFT, a SPEED żąda odświeżania od około 2,67 ms do 2 s (z rozdzielczością
+Silnik analizuje okna 2048 próbek, wybiera najsilniejsze lokalne maksima widma
+i resyntezuje je z podtrzymaniem fazy oraz nakładaniem okien. Sąsiednie biny okna
+są grupowane z maksimum i nie zużywają kolejnych atomów; ich fazy są powiązane.
+ATOMS określa maksymalną liczbę wybieranych maksimów (1–1023), ograniczoną
+liczbą rozpoznawalnych składowych i rozdzielczością FFT. Pełne ATOMS z normalną
+dynamiką zachowuje całe widmo. SPEED żąda odświeżania od około 2,67 ms do 2 s (z rozdzielczością
 kroku 256 próbek). **To przyjęte zakresy tej implementacji**: instrukcja EHX
 nie podaje oryginalnych zakresów ani wewnętrznego algorytmu.
 

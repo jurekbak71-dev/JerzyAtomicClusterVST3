@@ -30,6 +30,30 @@ int main() try {
     fft(a); fft(a, true);
     for (int i = 0; i < fftSize; ++i) check(std::abs(a[i] - original[i]) < 1e-10, "FFT roundtrip");
     ++passed;
+    // A second atom must select the second independent tone, not another
+    // leakage bin of the stronger 440 Hz partial (regression from 0.1.0).
+    for (int mode : {0, 1}) {
+        Values two = defaults(); two[Atoms] = std::log(2.)/std::log(1023.);
+        two[Speed] = two[Blend] = 1; two[Smooth] = mode;
+        Engine e; e.reset(48000, two); std::vector<double> y(96000);
+        for (int i=0; i<int(y.size()); ++i) {
+            double in=.2*std::sin(2*pi*440*i/48000)+.08*std::sin(2*pi*880*i/48000);
+            y[i]=e.process(in,in,two)[0];
+        }
+        check(tone(y,440,48000)>.17 && tone(y,880,48000)>.065, "two atoms must retain two distinct partials");
+        ++passed;
+    }
+    {
+        Values flat = defaults(); flat[Atoms] = std::log(2.)/std::log(1023.);
+        flat[Speed] = flat[Blend] = flat[Flat] = 1;
+        Engine e; e.reset(48000,flat); std::vector<double> y(96000);
+        for (int i=0;i<int(y.size());++i) {
+            double in=.2*std::sin(2*pi*440*i/48000)+.08*std::sin(2*pi*880*i/48000);
+            y[i]=e.process(in,in,flat)[0];
+        }
+        const double ratio=tone(y,880,48000)/tone(y,440,48000);
+        check(ratio>.85 && ratio<1.18, "flat mode should equalize distinct partials"); ++passed;
+    }
     // Dry mix and bypass must preserve the delayed input exactly at unity gain.
     for (int bypass : {0, 1}) {
         p = defaults(); p[Blend] = 0; p[Bypass] = bypass;
