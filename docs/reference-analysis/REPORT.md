@@ -1,5 +1,10 @@
 # Materiał referencyjny i poprawka 0.1.1
 
+**Uzupełnienie:** po otrzymaniu mniejszego MP4 odczytano też obraz, stany diody
+i przybliżone pozycje gałek. Nowe ustalenia, w tym pozostały sprzęt użyty
+w nagraniu: [analiza filmu](video/VIDEO_FINDINGS.md). Poniżej zachowano opis
+pierwszego etapu opartego na samym MP3.
+
 Materiał: przesłany przez użytkownika `Pico Atomic Cluster Spectral Decomposer
 Glitch Synth (Demo)_01.mp3`. Długość zdekodowanego nagrania: **385,63 s**,
 oryginalne próbkowanie 44,1 kHz, stereo. Kanały są niemal identyczne

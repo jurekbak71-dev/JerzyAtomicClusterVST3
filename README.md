@@ -11,6 +11,8 @@ nie jest to oficjalna wtyczka EHX ani potwierdzona kopia brzmienia kostki.
 [Analiza materiału referencyjnego i poprawka ATOMS](docs/reference-analysis/REPORT.md)
 — przykłady powyżej pochodzą z wersji 0.1.0. W 0.1.1 zmieniła się selekcja składowych.
 
+[Analiza filmu: ustawienia gałek, tryby i pozostały tor efektów](docs/reference-analysis/video/VIDEO_FINDINGS.md).
+
 ## Instalacja w Windows / FL Studio
 
 1. Rozpakuj `JerzyAtomicClusterVST3-Win64.zip`.

@@ -1,0 +1,164 @@
+{
+  "video_duration_seconds": 385.717007,
+  "width": 1066,
+  "height": 600,
+  "method": "Manually reviewed exact-time frames, not continuous state tracking; clock positions approximate +/-30 minutes.",
+  "audio_alignment": {
+    "video_minus_previous_mp3_seconds": 0.0232,
+    "measured_waveform_correlation_at_20_100_200_seconds": [
+      0.9985349723,
+      0.9977051414,
+      0.9957667901
+    ]
+  },
+  "visually_checked_actions": [
+    {
+      "time_seconds": 23.1,
+      "uncertainty_seconds": 0.15,
+      "action": "Footswitch press, dark LED becomes red; engage Sharp"
+    },
+    {
+      "time_seconds": 205.3,
+      "uncertainty_seconds": 0.15,
+      "action": "Mode button press, green LED becomes red; Smooth to Sharp; knobs visually unchanged"
+    }
+  ],
+  "gear_list_visible_at_60_seconds": [
+    "Paul Reed Smith CE24",
+    "Porter Pickups",
+    "Boss BP-1W Booster / Preamp",
+    "Strymon Timeline Delay",
+    "Strymon Flint Tremolo & Reverb",
+    "Milkman The Amp Stereo",
+    "Universal Audio Volt 476P"
+  ],
+  "cautions": [
+    "List does not establish effects active in each segment or signal-chain order.",
+    "B-roll not treated as proof of synchronized control state.",
+    "A dark LED during tap-tempo blinking is not proof of bypass.",
+    "Flat/full dynamics not assigned from steady LED color.",
+    "Clock positions are not converted to original Hz, atom counts, wet fraction or gain."
+  ],
+  "snapshots": [
+    {
+      "video_time": 20,
+      "mode": "bypass",
+      "volume_clock": "1:30",
+      "blend_clock": "5:00",
+      "speed_clock": "1:30",
+      "atoms_clock": "9:30"
+    },
+    {
+      "video_time": 30,
+      "mode": "sharp",
+      "volume_clock": "1:30",
+      "blend_clock": "5:00",
+      "speed_clock": "1:30",
+      "atoms_clock": "9:30"
+    },
+    {
+      "video_time": 60,
+      "mode": "sharp",
+      "volume_clock": "1:30",
+      "blend_clock": "5:00",
+      "speed_clock": "1:30",
+      "atoms_clock": "9:30"
+    },
+    {
+      "video_time": 70,
+      "mode": "smooth",
+      "volume_clock": "1:30",
+      "blend_clock": "5:00",
+      "speed_clock": "1:30",
+      "atoms_clock": "9:30"
+    },
+    {
+      "video_time": 90,
+      "mode": "smooth",
+      "volume_clock": "1:30",
+      "blend_clock": "2:00",
+      "speed_clock": "1:30",
+      "atoms_clock": "9:30"
+    },
+    {
+      "video_time": 110,
+      "mode": "smooth",
+      "volume_clock": "1:30",
+      "blend_clock": "12:00",
+      "speed_clock": "1:30",
+      "atoms_clock": "9:30"
+    },
+    {
+      "video_time": 120,
+      "mode": "smooth",
+      "volume_clock": "1:30",
+      "blend_clock": "12:00",
+      "speed_clock": "1:30",
+      "atoms_clock": "12:00"
+    },
+    {
+      "video_time": 140,
+      "mode": "smooth",
+      "volume_clock": "1:30",
+      "blend_clock": "1:00",
+      "speed_clock": "4:30",
+      "atoms_clock": "12:00"
+    },
+    {
+      "video_time": 190,
+      "mode": "smooth",
+      "volume_clock": "1:30",
+      "blend_clock": "5:00",
+      "speed_clock": "11:00",
+      "atoms_clock": "3:00"
+    },
+    {
+      "video_time": 200,
+      "mode": "smooth",
+      "volume_clock": "1:30",
+      "blend_clock": "5:00",
+      "speed_clock": "8:30",
+      "atoms_clock": "3:00"
+    },
+    {
+      "video_time": 210,
+      "mode": "sharp",
+      "volume_clock": "1:30",
+      "blend_clock": "5:00",
+      "speed_clock": "8:30",
+      "atoms_clock": "3:00"
+    },
+    {
+      "video_time": 250,
+      "mode": "sharp",
+      "volume_clock": "1:30",
+      "blend_clock": "5:00",
+      "speed_clock": "8:30",
+      "atoms_clock": "9:30"
+    },
+    {
+      "video_time": 320,
+      "mode": "sharp",
+      "volume_clock": "1:30",
+      "blend_clock": "3:00",
+      "speed_clock": "2:30",
+      "atoms_clock": "1:30"
+    },
+    {
+      "video_time": 330,
+      "mode": "sharp",
+      "volume_clock": "1:30",
+      "blend_clock": "3:00",
+      "speed_clock": "4:30",
+      "atoms_clock": "3:30"
+    },
+    {
+      "video_time": 350,
+      "mode": "smooth",
+      "volume_clock": "1:30",
+      "blend_clock": "3:00",
+      "speed_clock": "4:30",
+      "atoms_clock": "3:30"
+    }
+  ]
+}
