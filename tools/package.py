@@ -34,6 +34,9 @@ destination = bundle / 'Contents/x86_64-win/JerzyAtomicCluster.vst3'
 destination.parent.mkdir(parents=True, exist_ok=True)
 (bundle / 'Contents/Resources').mkdir(parents=True, exist_ok=True)
 shutil.copy2(binary, destination)
+native_metadata = binary.parent.parent / 'Resources/moduleinfo.json'
+if native_metadata.is_file():
+    shutil.copy2(native_metadata, bundle / 'Contents/Resources/moduleinfo.json')
 sdk = Path(args.sdk).resolve()
 archive = out / 'JerzyAtomicClusterVST3-Win64.zip'
 with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
