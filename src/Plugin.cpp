@@ -17,8 +17,16 @@ static bool readState(IBStream* stream, Values& v) {
     if (!stream) return false;
     IBStreamer s(stream, kLittleEndian);
     int32 magic = 0, version = 0;
-    if (!s.readInt32(magic) || !s.readInt32(version) || magic != stateMagic || version != 1) return false;
-    for (auto& value : v) if (!s.readDouble(value) || !std::isfinite(value) || value < 0 || value > 1) return false;
+    if (!s.readInt32(magic) || !s.readInt32(version) || magic != stateMagic || (version != 1 && version != 2)) return false;
+    v = defaults();
+    const int count = version == 1 ? 10 : NumParams;
+    for (int i=0;i<count;++i)
+        if (!s.readDouble(v[i]) || !std::isfinite(v[i]) || v[i] < 0 || v[i] > 1) return false;
+    if (version == 1) {
+        const double atoms = std::clamp(std::round(std::pow(1023.,v[Atoms])),1.,64.);
+        v[Atoms] = std::log(atoms)/std::log(64.);
+        v[Motion]=0; v[Stereo]=0; // Older projects did not request stereo motion.
+    }
     return true;
 }
 Processor::Processor() {
@@ -64,7 +72,7 @@ tresult PLUGIN_API Processor::setState(IBStream* stream) {
 tresult PLUGIN_API Processor::getState(IBStream* stream) {
     if (!stream) return kResultFalse;
     IBStreamer s(stream, kLittleEndian);
-    if (!s.writeInt32(stateMagic) || !s.writeInt32(1)) return kResultFalse;
+    if (!s.writeInt32(stateMagic) || !s.writeInt32(2)) return kResultFalse;
     for (auto& value : values) if (!s.writeDouble(value.load(std::memory_order_relaxed))) return kResultFalse;
     return kResultOk;
 }
@@ -107,6 +115,7 @@ tresult PLUGIN_API Processor::process(ProcessData& data) {
             }
         }
         auto y = engine.process(input[0], input[1], p, bpm);
+        if(out.numChannels==1) y[0]=(y[0]+y[1])*.5;
         for (int c = 0; c < out.numChannels; ++c) {
             if (data.symbolicSampleSize == kSample32 && out.channelBuffers32 && out.channelBuffers32[c]) out.channelBuffers32[c][i] = static_cast<float>(y[c]);
             if (data.symbolicSampleSize == kSample64 && out.channelBuffers64 && out.channelBuffers64[c]) out.channelBuffers64[c][i] = y[c];
@@ -118,12 +127,12 @@ tresult PLUGIN_API Controller::initialize(FUnknown* host) {
     auto result = EditControllerEx1::initialize(host);
     if (result != kResultOk) return result;
     addUnit(new Unit(STR16("Atomic Cluster"), kRootUnitId, kNoParentUnitId));
-    const TChar* titles[]{STR16("Volume"), STR16("Blend"), STR16("Speed"), STR16("Atoms"), STR16("Smooth"), STR16("Flat dynamics"), STR16("Bypass"), STR16("Host sync"), STR16("Beat division"), STR16("Tap tempo enabled")};
+    const TChar* titles[]{STR16("Volume"), STR16("Blend"), STR16("Speed"), STR16("Atoms"), STR16("Smooth"), STR16("Flat dynamics"), STR16("Bypass"), STR16("Host sync"), STR16("Beat division"), STR16("Tap tempo enabled"), STR16("Atom pattern"), STR16("Stereo motion")};
     auto initial = defaults();
     for (int i = 0; i < NumParams; ++i) {
         int flags = ParameterInfo::kCanAutomate;
         if (i == Bypass) flags |= ParameterInfo::kIsBypass;
-        const int steps = (i >= Smooth && i <= Sync) || i == TapEnabled ? 1 : i == Division ? 4 : 0;
+        const int steps = (i >= Smooth && i <= Sync) || i == TapEnabled ? 1 : i == Division ? 4 : i == Motion ? 2 : 0;
         parameters.addParameter(titles[i], nullptr, steps, initial[i], flags, i);
     }
     return kResultOk;
@@ -143,6 +152,8 @@ tresult PLUGIN_API Controller::getParamStringByValue(ParamID id, ParamValue v, S
     case Blend: std::snprintf(buffer, sizeof(buffer), "%.0f %% wet", v * 100); break;
     case Speed: std::snprintf(buffer, sizeof(buffer), "%.4f ms", interval(v) * 1000); break;
     case Atoms: std::snprintf(buffer, sizeof(buffer), "%d", atomCount(v)); break;
+    case Motion: { const char* names[]{"Cluster", "Arpeggio", "Random harmonic"}; std::snprintf(buffer,sizeof(buffer),"%s",names[int(std::round(v*2))]); break; }
+    case Stereo: std::snprintf(buffer,sizeof(buffer),"%.0f %%",v*100); break;
     case Smooth: std::snprintf(buffer, sizeof(buffer), "%s", v >= .5 ? "Smooth" : "Sharp"); break;
     case Flat: std::snprintf(buffer, sizeof(buffer), "%s", v >= .5 ? "Flat" : "Full"); break;
     case Division: { const char* labels[]{"1/16", "1/8", "1/4", "1/2", "1 bar"}; std::snprintf(buffer, sizeof(buffer), "%s", labels[int(std::round(v * 4))]); break; }
@@ -156,6 +167,11 @@ tresult PLUGIN_API Controller::getParamValueByString(ParamID id, TChar* input, P
     char text[128]{};
     for (int i = 0; i < 127 && input[i]; ++i) text[i] = char(input[i]);
     const std::string label(text);
+    if (id == Motion) {
+        const char* names[]{"Cluster", "Arpeggio", "Random harmonic"};
+        for(int i=0;i<3;++i) if(label==names[i]) { v=i/2.; return kResultTrue; }
+        return kResultFalse;
+    }
     if (id == Division) {
         const char* names[]{"1/16", "1/8", "1/4", "1/2", "1 bar"};
         for (int i = 0; i < 5; ++i) if (label == names[i]) { v = i / 4.; return kResultTrue; }
@@ -171,9 +187,10 @@ tresult PLUGIN_API Controller::getParamValueByString(ParamID id, TChar* input, P
     if (end == text || !std::isfinite(number)) return kResultFalse;
     switch (id) {
     case Volume: v = clean(std::pow(10., number / 20.) / 2.); break;
+    case Stereo:
     case Blend: v = clean(number / 100.); break;
     case Speed: if (number <= 0) return kResultFalse; v = clean(std::log(number / 2000.) / std::log(1. / 750.)); break;
-    case Atoms: if (number < 1 || number > 1023) return kResultFalse; v = std::log(std::round(number)) / std::log(1023.); break;
+    case Atoms: if (number < 1 || number > 64) return kResultFalse; v = std::log(std::round(number)) / std::log(64.); break;
     default: return kResultFalse;
     }
     return kResultTrue;

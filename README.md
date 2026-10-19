@@ -1,20 +1,20 @@
-# Jerzy Atomic Cluster — VST3 0.1.2
+# Jerzy Atomic Cluster — VST3 0.2.0
 
-Eksperymentalny dekompozytor widma dla Windows x64, inspirowany zachowaniem
-EHX Pico Atomic Cluster opisanym w instrukcji producenta. Własny algorytm DSP;
-nie jest to oficjalna wtyczka EHX ani potwierdzona kopia brzmienia kostki.
+Efekt dla Windows x64: harmoniczne atomy, rytmiczne arpeggio, losowe wzory
+i niezależny ruch głosów w stereo. Własny algorytm inspirowany Pico Atomic
+Cluster, rozwinięty według uwag odsłuchowych użytkownika.
 
-[Pobierz Windows VST3 0.1.2](releases/0.1.1/JerzyAtomicClusterVST3-Win64.zip)
+**[Pobierz Windows VST3 0.2.0](releases/0.2.0/JerzyAtomicClusterVST3-Win64.zip)**
 
-[Nowe próbki 0.1.2 — pięć ustawień pod film](audio-examples/0.1.2/README.md)
+**[▶ Porównanie audio: dry, 1/16/64 atomy, ARP, RANDOM, SMOOTH, stereo](audio-examples/0.2.0/README.md)**
 
-[Archiwalne próbki 0.1.0](audio-examples/README.md)
+W 0.2.0 wet pochodzi wyłącznie z banku oscylatorów. Zwiększenie ATOMS dodaje
+głosy i harmoniczne, zamiast przywracać oryginalne widmo. Ich poziom jest
+wyrównywany, aby gęsty efekt nie zanikał. BLEND = 100% wyklucza tor dry.
+SHARP nadaje atomom puls, SMOOTH łagodnie zmienia ich poziomy i wysokości.
 
-[Analiza materiału referencyjnego i poprawka ATOMS](docs/reference-analysis/REPORT.md)
-— w 0.1.1 poprawiono selekcję składowych. W 0.1.2 SMOOTH ma dłuższe przejścia,
-a wygaszane tony zachowują wysokość po kolejnych pobraniach widma.
-
-[Analiza filmu: ustawienia gałek, tryby i pozostały tor efektów](docs/reference-analysis/video/VIDEO_FINDINGS.md).
+[Archiwalne próbki 0.1.2](audio-examples/0.1.2/README.md) ·
+[Analiza filmu referencyjnego](docs/reference-analysis/video/VIDEO_FINDINGS.md)
 
 ## Instalacja w Windows / FL Studio
 
@@ -30,33 +30,44 @@ zachowaj znajdujące się w nim podfoldery `Contents`.
 ## Obsługa
 
 - **VOL** — poziom wyjściowy; środek = unity, maksimum około +6 dB.
-- **BLEND** — proporcja sygnału dry/wet; oba tory są wyrównane w czasie.
+- **BLEND** — 0% = wyłącznie dry, 100% = wyłącznie atomy (wet). Domyślnie 100%.
 - **SPEED** — szybkość aktualizacji widma; w prawo = szybciej.
-- **ATOMS** — liczba zachowanych składowych widma; w lewo = bardziej syntetycznie.
+- **ATOMS** — 1–64 głosy. Więcej atomów zagęszcza harmoniczne, również przy
+  prostym wejściu z niewielką liczbą składowych.
+- **CLUSTER / ARP / RANDOM** — widoczne przyciski pod gałkami. CLUSTER łączy
+  rozpoznane składowe z dodatkowymi harmonicznymi. ARP prowadzi rytmiczną
+  sekwencję oktaw, kwint i tercji. RANDOM losuje harmonicznie powiązane głosy.
+- **STEREO** — kliknij pasek nad przyciskami patternu, aby przełączyć 0 / 50 / 100%.
+  Dokładna regulacja jest też dostępna w parametrach hosta; domyślnie 85%.
+  Każdy atom ma osobny ruch panoramy, także przy wejściu mono na szynie stereo.
 - **MODE** — kliknięcie przełącza SHARP / SMOOTH. Przytrzymanie około sekundy
-  przełącza pełną / wyrównaną dynamikę.
+  przełącza pełną / wyrównaną dynamikę. SHARP = puls, SMOOTH = płynność.
 - **Footswitch** — bypass; dwa kliknięcia ustawiają również tap tempo.
 - Środkowy przycisk myszy — tap tempo bez przełączania bypassu.
 - Prawy przycisk — dynamika, włączenie tap tempo, synchronizacja do tempa hosta
-  i podział rytmiczny. Obrót SPEED wyłącza synchronizację do hosta.
+  i podział rytmiczny, wzór atomów oraz szerokość stereo. Obrót SPEED wyłącza synchronizację do hosta.
 - Gałki: przeciąganie w pionie; Shift pozwala regulować dokładniej.
 
 Wszystkie parametry, również dynamika i ustawienia tap/sync, zapisują się w projekcie.
-Po niskim ustawieniu SPEED aktualizacja efektu może nastąpić dopiero w kolejnym kroku.
+Starsze projekty (format 0.1.x) są odczytywane: ATOMS zachowuje liczbę głosów
+do 64, a ruch stereo pozostaje wyłączony. Nowy stan zapisuje format 2 z 12 parametrami.
 
 ## Zakres i ograniczenia
 
-Silnik analizuje okna 2048 próbek, wybiera najsilniejsze lokalne maksima widma
-i resyntezuje je z podtrzymaniem fazy oraz nakładaniem okien. Sąsiednie biny okna
-są grupowane z maksimum i nie zużywają kolejnych atomów; ich fazy są powiązane.
-ATOMS określa maksymalną liczbę wybieranych maksimów (1–1023), ograniczoną
-liczbą rozpoznawalnych składowych i rozdzielczością FFT. Pełne ATOMS z normalną
-dynamiką zachowuje całe widmo. SPEED żąda odświeżania od około 2,67 ms do 2 s (z rozdzielczością
-kroku 256 próbek). **To przyjęte zakresy tej implementacji**: instrukcja EHX
-nie podaje oryginalnych zakresów ani wewnętrznego algorytmu.
+Silnik analizuje okna 2048 próbek co 256 próbek i steruje bankiem 64 oscylatorów.
+Rozpoznane lokalne maksima wyznaczają składowe i harmoniczną bazę. CLUSTER dodaje
+harmoniczne ponad to, co rozpoznano w wejściu; ARP/RANDOM tworzą muzyczne wzory.
+Poziom głosów jest wyrównywany energetycznie; łagodna saturacja ogranicza szczyty
+samego wet. SHARP ma krótką obwiednię rytmiczną, SMOOTH płynnie zmienia amplitudy
+i częstotliwości. Nie jest to przezroczysta rekonstrukcja widma.
+
+SPEED żąda kroku od około 2,67 ms do 2 s, z rozdzielczością 256 próbek.
+Przy bardzo szybkim SPEED impulsy zlewają się w barwę. Zakresy i arpeggiator są
+wyborem tej implementacji; nie pochodzą z pomiaru oryginalnego urządzenia.
 
 Mono i stereo, obliczenia wejścia/wyjścia 32/64-bit, sample rate 8–384 kHz.
-Oryginalna kostka jest mono; stereo i host sync są rozszerzeniami tej wtyczki.
+Oryginalna kostka jest mono; stereo, ARP/RANDOM i host sync są rozszerzeniami tej wtyczki.
+Na szynie mono host otrzymuje sumę L/R; do ruchu stereo wybierz szynę stereo.
 Zgłaszana latencja wynosi 2048 próbek, czyli około 42,7 ms przy 48 kHz.
 Host może kompensować ją w projekcie, ale jest słyszalna przy grze na żywo.
 

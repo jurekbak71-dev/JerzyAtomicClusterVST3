@@ -14,7 +14,7 @@ static void check(bool c, const char* m) { if (!c) throw std::runtime_error(m); 
 static void rewind(MemoryStream& s) { s.seek(0, IBStream::kIBSeekSet, nullptr); }
 static void state(MemoryStream& s, const Values& values) {
     IBStreamer writer(&s, kLittleEndian);
-    writer.writeInt32(0x4A414331); writer.writeInt32(1);
+    writer.writeInt32(0x4A414331); writer.writeInt32(2);
     for (auto v : values) writer.writeDouble(v);
     rewind(s);
 }
@@ -28,7 +28,7 @@ int main() try {
         ParameterInfo info{}; check(c.getParameterInfo(i, info) == kResultOk && info.id == unsigned(i), "stable parameter IDs");
     }
     ++passed;
-    auto v = defaults(); v[Flat] = v[Smooth] = v[Sync] = v[Bypass] = 1; v[Atoms] = .23; v[Division] = .75;
+    auto v = defaults(); v[Flat] = v[Smooth] = v[Sync] = v[Bypass] = 1; v[Atoms] = .23; v[Division] = .75; v[Motion]=1; v[Stereo]=.7;
     MemoryStream initial; state(initial, v);
     check(p->setState(&initial) == kResultOk, "restore processor");
     MemoryStream saved; check(p->getState(&saved) == kResultOk, "save processor"); rewind(saved);
@@ -42,6 +42,20 @@ int main() try {
     ++passed;
     MemoryStream truncated(saved.getData(), saved.getSize() - 1);
     check(p->setState(&truncated) == kResultFalse, "truncated state must be rejected"); ++passed;
+    // Version 1 used ten parameters and an ATOMS range of 1..1023.
+    MemoryStream legacy; IBStreamer old(&legacy,kLittleEndian);
+    old.writeInt32(0x4A414331); old.writeInt32(1);
+    auto legacyValues=defaults(); legacyValues[Atoms]=std::log(23.)/std::log(1023.);
+    for(int i=0;i<10;++i) old.writeDouble(legacyValues[i]);
+    rewind(legacy); check(p->setState(&legacy)==kResultOk,"load ten-parameter legacy state");
+    MemoryStream migrated; p->getState(&migrated); rewind(migrated); c.setComponentState(&migrated);
+    check(atomCount(c.getParamNormalized(Atoms))==23 && c.getParamNormalized(Motion)==0 && c.getParamNormalized(Stereo)==0,"legacy atom count and mono migration"); ++passed;
+    rewind(initial); check(p->setState(&initial)==kResultOk,"restore modern state after migration");
+    for(int id:{Motion,Stereo}) {
+        String128 text{}; double parsed=0;
+        check(c.getParamStringByValue(id,1,text)==kResultTrue && c.getParamValueByString(id,text,parsed)==kResultTrue && parsed==1,"new parameter text roundtrip");
+    }
+    ++passed;
     ProcessSetup setup{}; setup.sampleRate = 48000; setup.maxSamplesPerBlock = 128; setup.symbolicSampleSize = kSample32; setup.processMode = kRealtime;
     check(p->setupProcessing(setup) == kResultOk, "setup processing");
     SpeakerArrangement mono = SpeakerArr::kMono;

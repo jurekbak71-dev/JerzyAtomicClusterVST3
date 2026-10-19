@@ -62,8 +62,13 @@ int main(int argc, char** argv) try {
     click(child, 210, 665); check(c->getParamNormalized(Bypass) >= .5, "footswitch bypass");
     Sleep(100); click(child, 210, 665);
     check(c->getParamNormalized(Bypass) < .5 && c->getParamNormalized(Speed) > .3 && c->getParamNormalized(Speed) < .6, "footswitch tap tempo");
+    click(child,210,503); check(c->getParamNormalized(Motion)==.5,"visible ARP button");
+    click(child,308,503); check(c->getParamNormalized(Motion)==1,"visible RANDOM button");
+    click(child,112,503); check(c->getParamNormalized(Motion)==0,"visible CLUSTER button");
+    const double previousWidth=c->getParamNormalized(Stereo);
+    click(child,210,474); check(c->getParamNormalized(Stereo)!=previousWidth,"visible stereo control");
     if (argc >= 3) screenshot(child, argv[2]);
     check(view->removed() == kResultOk, "detach GUI"); view->release(); DestroyWindow(parent);
     c->terminate(); c->release(); factory->release(); check(exit(), "unload module"); FreeLibrary(module);
-    std::cout << "6 Windows GUI checks passed\n"; return 0;
+    std::cout << "10 Windows GUI checks passed\n"; return 0;
 } catch (const std::exception& e) { std::cerr << "FAIL: " << e.what() << '\n'; return 1; }

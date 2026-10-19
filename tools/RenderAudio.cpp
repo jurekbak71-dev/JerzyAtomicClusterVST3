@@ -22,7 +22,7 @@ static void check(bool c, const char* s) { if (!c) throw std::runtime_error(s); 
 template<class T> static T read(std::istream& f) { T x{}; f.read(reinterpret_cast<char*>(&x), sizeof(x)); check(bool(f), "truncated WAV"); return x; }
 template<class T> static void write(std::ostream& f, T x) { f.write(reinterpret_cast<const char*>(&x), sizeof(x)); }
 int main(int argc, char** argv) try {
-    check(argc == 10, "render_audio plugin input.wav output.wav volume blend period_ms atoms smooth flat");
+    check((argc == 10 || argc == 12), "render_audio plugin input.wav output.wav volume blend period_ms atoms smooth flat [pattern stereo]");
     std::ifstream file(argv[2], std::ios::binary); check(bool(file), "open source WAV");
     char tag[4]; file.read(tag, 4); check(std::memcmp(tag,"RIFF",4)==0,"RIFF input");
     read<uint32_t>(file); file.read(tag,4); check(std::memcmp(tag,"WAVE",4)==0,"WAVE input");
@@ -58,10 +58,11 @@ int main(int argc, char** argv) try {
     check(component->queryInterface(IAudioProcessor::iid,reinterpret_cast<void**>(&processor))==kResultOk,"audio processor interface");
     auto p=defaults(); p[Volume]=std::stod(argv[4]); p[Blend]=std::stod(argv[5]);
     p[Speed]=std::log(std::stod(argv[6])/2000.)/std::log(1./750.);
-    p[Atoms]=std::log(std::stod(argv[7]))/std::log(1023.); p[Smooth]=std::stod(argv[8]); p[Flat]=std::stod(argv[9]);
+    p[Atoms]=std::log(std::stod(argv[7]))/std::log(argc==12 ? 64. : 1023.); p[Smooth]=std::stod(argv[8]); p[Flat]=std::stod(argv[9]);
+    if(argc==12) { p[Motion]=std::stod(argv[10]); p[Stereo]=std::stod(argv[11]); }
     for(auto v:p) check(std::isfinite(v) && v>=0 && v<=1,"parameter range");
-    MemoryStream state; IBStreamer s(&state,kLittleEndian); s.writeInt32(0x4A414331); s.writeInt32(1);
-    for(auto v:p) s.writeDouble(v); state.seek(0,IBStream::kIBSeekSet,nullptr);
+    MemoryStream state; IBStreamer s(&state,kLittleEndian); s.writeInt32(0x4A414331); s.writeInt32(argc==12 ? 2:1);
+    for(int i=0;i<(argc==12 ? NumParams:10);++i) s.writeDouble(p[i]); state.seek(0,IBStream::kIBSeekSet,nullptr);
     check(component->setState(&state)==kResultOk,"restore requested preset");
     SpeakerArrangement layout=SpeakerArr::kStereo;
     check(processor->setBusArrangements(&layout,1,&layout,1)==kResultOk,"stereo buses");

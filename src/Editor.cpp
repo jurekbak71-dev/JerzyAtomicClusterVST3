@@ -91,12 +91,15 @@ class PedalEditor final : public CPluginView {
         ellipse(dc, 210, 272, 22, on ? (smooth ? RGB(27, 95, 55) : RGB(122, 19, 26)) : RGB(30, 24, 37));
         ellipse(dc, 210, 272, 13, on ? (smooth ? RGB(131, 255, 159) : RGB(255, 224, 185)) : RGB(58, 52, 63));
         text(dc, 297, on ? (smooth ? "SMOOTH" : "SHARP") : "BYPASS", 13);
-        text(dc, 466, value(Flat) >= .5 ? "FLAT DYNAMICS" : "FULL DYNAMICS", 11, RGB(219, 208, 234));
+        char spatial[100]{};
+        std::snprintf(spatial,sizeof(spatial),"STEREO %.0f%%   |   %s DYNAMICS",value(Stereo)*100,value(Flat)>=.5 ? "FLAT" : "FULL");
+        fill(dc,65,464,290,22,RGB(47,32,79),6);
+        text(dc,466,spatial,11,RGB(219,208,234));
         // Original Jerzy branding with the pedal's purple/yellow visual vocabulary.
         auto pen = CreatePen(PS_SOLID, 3, RGB(249, 187, 36)); auto op = SelectObject(dc, pen);
         auto ob = SelectObject(dc, GetStockObject(NULL_BRUSH));
         RoundRect(dc, 55, 488, 365, 714, 18, 18);
-        Ellipse(dc, 87, 507, 333, 604); Ellipse(dc, 146, 471, 273, 633);
+        Ellipse(dc, 87, 526, 333, 604); Ellipse(dc, 146, 523, 273, 633);
         SelectObject(dc, ob); SelectObject(dc, op); DeleteObject(pen);
         fill(dc, 88, 521, 244, 76, RGB(31, 18, 67), 12);
         text(dc, 520, "ATOMIC", 35); text(dc, 556, "CLUSTER", 32);
@@ -106,6 +109,12 @@ class PedalEditor final : public CPluginView {
         ellipse(dc, 210, 665, 37, RGB(219, 219, 214));
         ellipse(dc, 210, 664, 29, RGB(110, 112, 111));
         ellipse(dc, 210, 662, 24, RGB(169, 171, 167));
+        const char* patterns[]{"CLUSTER", "ARP", "RANDOM"};
+        for(int i=0;i<3;++i) {
+            const bool selected=int(std::round(value(Motion)*2))==i;
+            fill(dc,65+i*98,490,94,27,selected ? RGB(210,152,30) : RGB(47,32,79),6);
+            text(dc,495,patterns[i],12,selected ? RGB(24,15,45) : RGB(240,228,248),65+i*98,94);
+        }
         text(dc, 719, "CLICK: BYPASS   /   RIGHT CLICK: OPTIONS", 11, RGB(215, 205, 228));
         BitBlt(target, 0, 0, width, height, dc, 0, 0, SRCCOPY);
         SelectObject(dc, old); DeleteObject(bmp); DeleteDC(dc); EndPaint(window, &ps);
@@ -118,9 +127,16 @@ class PedalEditor final : public CPluginView {
         AppendMenuA(m, MF_SEPARATOR, 0, nullptr);
         const char* names[]{"1/16 beat", "1/8 beat", "1/4 beat", "1/2 beat", "1 bar"};
         for (int i = 0; i < 5; ++i) AppendMenuA(m, MF_STRING | (int(std::round(value(Division) * 4)) == i ? MF_CHECKED : 0), 10 + i, names[i]);
+        AppendMenuA(m,MF_SEPARATOR,0,nullptr);
+        const char* patterns[]{"Pattern: Cluster", "Pattern: Arpeggio", "Pattern: Random harmonic"};
+        for(int i=0;i<3;++i) AppendMenuA(m,MF_STRING | (int(std::round(value(Motion)*2))==i ? MF_CHECKED:0),20+i,patterns[i]);
+        const char* widths[]{"Stereo: mono", "Stereo: 50%", "Stereo: 100%"};
+        for(int i=0;i<3;++i) AppendMenuA(m,MF_STRING | (std::abs(value(Stereo)-i*.5)<.01 ? MF_CHECKED:0),30+i,widths[i]);
         POINT p{x, y}; ClientToScreen(window, &p);
         int result = TrackPopupMenu(m, TPM_RETURNCMD | TPM_RIGHTBUTTON, p.x, p.y, 0, window, nullptr);
         DestroyMenu(m);
+        if(result>=20 && result<=22) change(Motion,(result-20)*.5);
+        if(result>=30 && result<=32) change(Stereo,(result-30)*.5);
         if (result == 1) change(Flat, value(Flat) < .5 ? 1 : 0);
         if (result == 2) change(Sync, value(Sync) < .5 ? 1 : 0);
         if (result == 3) change(TapEnabled, value(TapEnabled) < .5 ? 1 : 0);
@@ -136,6 +152,8 @@ class PedalEditor final : public CPluginView {
             InvalidateRect(window, nullptr, FALSE); return 0;
         case WM_LBUTTONDOWN: {
             SetFocus(window);
+            if(y>=490 && y<=517 && x>=65 && x<359) { change(Motion,std::clamp((x-65)/98,0,2)*.5); return 0; }
+            if(y>=462 && y<486) { change(Stereo,value(Stereo)<.25 ? .5 : value(Stereo)<.75 ? 1 : 0); return 0; }
             const int xs[]{112, 308, 112, 308}, ys[]{167, 167, 361, 361};
             for (int i = 0; i < 4; ++i) if (std::hypot(double(x - xs[i]), double(y - ys[i])) < 55) {
                 drag = i; startY = y; startValue = value(i); controller->beginEdit(i); SetCapture(window); return 0;
