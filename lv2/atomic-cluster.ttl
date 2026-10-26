@@ -1,0 +1,44 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix mod: <http://moddevices.com/ns/mod#> .
+@prefix modgui: <http://moddevices.com/ns/modgui#> .
+@prefix pg: <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix pprops: <http://lv2plug.in/ns/ext/port-props#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix resize: <http://lv2plug.in/ns/ext/resize-port#> .
+@prefix time: <http://lv2plug.in/ns/ext/time#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix urid: <http://lv2plug.in/ns/ext/urid#> .
+
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/input> a pg:StereoGroup, pg:InputGroup ; lv2:name "Stereo input" ; lv2:symbol "input" .
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/output> a pg:StereoGroup, pg:OutputGroup ; lv2:name "Stereo output" ; lv2:symbol "output" .
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect> a lv2:Plugin, lv2:SpectralPlugin ;
+    doap:name "Jerzy Atomic Cluster" ;
+    doap:maintainer [ a foaf:Person ; foaf:name "Jerzy Audio" ] ;
+    mod:brand "Jerzy" ; mod:label "Atomic Cluster" ;
+    lv2:minorVersion 2 ; lv2:microVersion 1 ;
+    lv2:requiredFeature urid:map ;
+    lv2:optionalFeature lv2:hardRTCapable ;
+    rdfs:comment "Harmonic atoms, stereo orbits, arpeggio and random patterns. BPM sync follows host time:Position; without host tempo use the BPM control. Right input disconnected duplicates the mono input. Latency: 2048 samples." ;
+    lv2:port [ a lv2:InputPort, lv2:AudioPort ; lv2:index 0 ; lv2:symbol "in_l" ; lv2:name "Input L / Mono" ; pg:group <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/input> ; lv2:designation pg:left ],
+        [ a lv2:InputPort, lv2:AudioPort ; lv2:index 1 ; lv2:symbol "in_r" ; lv2:name "Input R" ; pg:group <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/input> ; lv2:designation pg:right ; lv2:portProperty lv2:connectionOptional ],
+        [ a lv2:OutputPort, lv2:AudioPort ; lv2:index 2 ; lv2:symbol "out_l" ; lv2:name "Output L" ; pg:group <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/output> ; lv2:designation pg:left ],
+        [ a lv2:OutputPort, lv2:AudioPort ; lv2:index 3 ; lv2:symbol "out_r" ; lv2:name "Output R" ; pg:group <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/output> ; lv2:designation pg:right ],
+        [ a lv2:InputPort, atom:AtomPort ; lv2:index 4 ; lv2:symbol "events" ; lv2:name "Host tempo / position" ; atom:bufferType atom:Sequence ; atom:supports time:Position ; resize:minimumSize 4096 ; lv2:portProperty lv2:connectionOptional ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 5 ; lv2:symbol "volume" ; lv2:name "Volume" ; lv2:default 0 ; lv2:minimum -60 ; lv2:maximum 6 ; units:unit units:db ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 6 ; lv2:symbol "blend" ; lv2:name "Blend" ; lv2:default 100 ; lv2:minimum 0 ; lv2:maximum 100 ; units:unit units:pc ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 7 ; lv2:symbol "speed_ms" ; lv2:name "Speed (Free)" ; lv2:default 141.581168 ; lv2:minimum 2.66666667 ; lv2:maximum 2000 ; units:unit units:ms ; lv2:portProperty pprops:logarithmic ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 8 ; lv2:symbol "atoms" ; lv2:name "Atoms" ; lv2:default 16 ; lv2:minimum 1 ; lv2:maximum 64 ; lv2:portProperty lv2:integer, pprops:logarithmic ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 9 ; lv2:symbol "smooth" ; lv2:name "Sharp / Smooth" ; lv2:default 0 ; lv2:minimum 0 ; lv2:maximum 1 ; lv2:portProperty lv2:integer, lv2:enumeration ; lv2:scalePoint [ rdfs:label "Sharp" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 0 ], [ rdfs:label "Smooth" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 1 ] ; lv2:portProperty lv2:toggled ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 10 ; lv2:symbol "flat" ; lv2:name "Flat dynamics" ; lv2:default 0 ; lv2:minimum 0 ; lv2:maximum 1 ; lv2:portProperty lv2:integer, lv2:toggled ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 11 ; lv2:symbol "enabled" ; lv2:name "Enabled" ; lv2:default 1 ; lv2:minimum 0 ; lv2:maximum 1 ; lv2:designation lv2:enabled ; lv2:portProperty lv2:integer, lv2:toggled ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 12 ; lv2:symbol "sync" ; lv2:name "BPM Sync" ; lv2:default 0 ; lv2:minimum 0 ; lv2:maximum 1 ; lv2:portProperty lv2:integer, lv2:toggled ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 13 ; lv2:symbol "division" ; lv2:name "Sync division" ; lv2:default 2 ; lv2:minimum 0 ; lv2:maximum 4 ; lv2:portProperty lv2:integer, lv2:enumeration ; lv2:scalePoint [ rdfs:label "1/16" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 0 ], [ rdfs:label "1/8" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 1 ], [ rdfs:label "1/4" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 2 ], [ rdfs:label "1/2" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 3 ], [ rdfs:label "1 bar" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 4 ] ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 14 ; lv2:symbol "pattern" ; lv2:name "Atom pattern" ; lv2:default 0 ; lv2:minimum 0 ; lv2:maximum 2 ; lv2:portProperty lv2:integer, lv2:enumeration ; lv2:scalePoint [ rdfs:label "Cluster" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 0 ], [ rdfs:label "Arpeggio" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 1 ], [ rdfs:label "Random harmonic" ; <http://www.w3.org/1999/02/22-rdf-syntax-ns#value> 2 ] ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 15 ; lv2:symbol "stereo" ; lv2:name "Stereo width" ; lv2:default 100 ; lv2:minimum 0 ; lv2:maximum 100 ; units:unit units:pc ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 16 ; lv2:symbol "bpm" ; lv2:name "BPM / fallback" ; lv2:default 120 ; lv2:minimum 20 ; lv2:maximum 400 ; units:unit units:bpm ; lv2:designation time:beatsPerMinute ],
+        [ a lv2:InputPort, lv2:ControlPort ; lv2:index 17 ; lv2:symbol "tap" ; lv2:name "Tap BPM (Sync)" ; lv2:default 0 ; lv2:minimum 0 ; lv2:maximum 1 ; lv2:portProperty lv2:integer, lv2:toggled, pprops:trigger ],
+        [ a lv2:OutputPort, lv2:ControlPort ; lv2:index 18 ; lv2:symbol "latency" ; lv2:name "Latency" ; lv2:designation lv2:latency ; lv2:portProperty lv2:integer, lv2:reportsLatency ; units:unit units:frame ] .

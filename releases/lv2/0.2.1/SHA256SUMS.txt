@@ -1,0 +1,3 @@
+491da71d69ab1d6b49c358976e43c757d1c24f707db74ee6c9febd835d1e8a04  JerzyAtomicCluster-LV2-RPi4B-aarch64.zip
+9cf861b4d457b69c472172301fcb6c145d6b39352a81285cd934642a09195e6c  JerzyAtomicCluster-LV2-RPi4B-armhf.zip
+7801d0d68439b72ad2cf294edb1854aa5d884bf29d6e9fb5084d7a201e3f5d80  JerzyAtomicCluster-LV2-RPi4B.zip

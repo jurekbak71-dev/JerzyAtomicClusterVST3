@@ -1,0 +1,19 @@
+name: LV2 host and metadata
+on:
+  push:
+  pull_request:
+jobs:
+  linux-lv2:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencies
+        run: sudo apt-get update && sudo apt-get install -y ninja-build lv2-dev lilv-utils
+      - name: Build LV2 without VST3 SDK
+        run: |
+          cmake -S . -B build-lv2 -G Ninja -DCMAKE_BUILD_TYPE=Release -DATOMIC_BUILD_PLUGIN=OFF -DATOMIC_BUILD_LV2=ON
+          cmake --build build-lv2 --parallel 4
+      - name: DSP and actual LV2 module checks
+        run: ctest --test-dir build-lv2 --output-on-failure --no-tests=error
+      - name: Lilv metadata and MOD GUI resources
+        run: python3 tools/validate-lv2.py build-lv2/lv2/JerzyAtomicCluster.lv2

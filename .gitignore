@@ -10,3 +10,7 @@
 /audio-examples/0.2.0/*.wav
 
 /audio-examples/0.2.1/*.wav
+
+/dist-lv2/
+
+__pycache__/

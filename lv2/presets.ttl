@@ -1,0 +1,20 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix mod: <http://moddevices.com/ns/mod#> .
+@prefix modgui: <http://moddevices.com/ns/modgui#> .
+@prefix pg: <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix pprops: <http://lv2plug.in/ns/ext/port-props#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix resize: <http://lv2plug.in/ns/ext/resize-port#> .
+@prefix time: <http://lv2plug.in/ns/ext/time#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix urid: <http://lv2plug.in/ns/ext/urid#> .
+
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/preset/stereo-cluster> a pset:Preset ; lv2:appliesTo <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect> ; rdfs:label "Stereo Cluster" ; lv2:port [ lv2:symbol "volume" ; pset:value 0.0 ], [ lv2:symbol "blend" ; pset:value 100.0 ], [ lv2:symbol "speed_ms" ; pset:value 141.581168 ], [ lv2:symbol "atoms" ; pset:value 32 ], [ lv2:symbol "smooth" ; pset:value 1 ], [ lv2:symbol "flat" ; pset:value 0.0 ], [ lv2:symbol "enabled" ; pset:value 1.0 ], [ lv2:symbol "sync" ; pset:value 0 ], [ lv2:symbol "division" ; pset:value 2.0 ], [ lv2:symbol "pattern" ; pset:value 0 ], [ lv2:symbol "stereo" ; pset:value 100 ], [ lv2:symbol "bpm" ; pset:value 120.0 ], [ lv2:symbol "tap" ; pset:value 0.0 ] .
+
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/preset/sharp-arp> a pset:Preset ; lv2:appliesTo <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect> ; rdfs:label "Sharp Arpeggio — BPM Sync" ; lv2:port [ lv2:symbol "volume" ; pset:value 0.0 ], [ lv2:symbol "blend" ; pset:value 100.0 ], [ lv2:symbol "speed_ms" ; pset:value 141.581168 ], [ lv2:symbol "atoms" ; pset:value 24 ], [ lv2:symbol "smooth" ; pset:value 0 ], [ lv2:symbol "flat" ; pset:value 0.0 ], [ lv2:symbol "enabled" ; pset:value 1.0 ], [ lv2:symbol "sync" ; pset:value 1 ], [ lv2:symbol "division" ; pset:value 1 ], [ lv2:symbol "pattern" ; pset:value 1 ], [ lv2:symbol "stereo" ; pset:value 100 ], [ lv2:symbol "bpm" ; pset:value 120.0 ], [ lv2:symbol "tap" ; pset:value 0.0 ] .
+
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/preset/random-pad> a pset:Preset ; lv2:appliesTo <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect> ; rdfs:label "Smooth Random Harmonics" ; lv2:port [ lv2:symbol "volume" ; pset:value 0.0 ], [ lv2:symbol "blend" ; pset:value 100.0 ], [ lv2:symbol "speed_ms" ; pset:value 141.581168 ], [ lv2:symbol "atoms" ; pset:value 48 ], [ lv2:symbol "smooth" ; pset:value 1 ], [ lv2:symbol "flat" ; pset:value 0.0 ], [ lv2:symbol "enabled" ; pset:value 1.0 ], [ lv2:symbol "sync" ; pset:value 1 ], [ lv2:symbol "division" ; pset:value 2 ], [ lv2:symbol "pattern" ; pset:value 2 ], [ lv2:symbol "stereo" ; pset:value 100 ], [ lv2:symbol "bpm" ; pset:value 120.0 ], [ lv2:symbol "tap" ; pset:value 0.0 ] .

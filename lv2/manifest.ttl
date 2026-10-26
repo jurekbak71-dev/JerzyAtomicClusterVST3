@@ -1,0 +1,19 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix mod: <http://moddevices.com/ns/mod#> .
+@prefix modgui: <http://moddevices.com/ns/modgui#> .
+@prefix pg: <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix pprops: <http://lv2plug.in/ns/ext/port-props#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix resize: <http://lv2plug.in/ns/ext/resize-port#> .
+@prefix time: <http://lv2plug.in/ns/ext/time#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix urid: <http://lv2plug.in/ns/ext/urid#> .
+
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect> a lv2:Plugin ; lv2:binary <atomic_cluster.so> ; rdfs:seeAlso <atomic-cluster.ttl>, <modgui.ttl> .
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/preset/stereo-cluster> a pset:Preset ; lv2:appliesTo <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect> ; rdfs:label "Stereo Cluster" ; rdfs:seeAlso <presets.ttl> .
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/preset/sharp-arp> a pset:Preset ; lv2:appliesTo <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect> ; rdfs:label "Sharp Arpeggio — BPM Sync" ; rdfs:seeAlso <presets.ttl> .
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect/preset/random-pad> a pset:Preset ; lv2:appliesTo <https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect> ; rdfs:label "Smooth Random Harmonics" ; rdfs:seeAlso <presets.ttl> .

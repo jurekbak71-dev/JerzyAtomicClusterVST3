@@ -1,0 +1,22 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix mod: <http://moddevices.com/ns/mod#> .
+@prefix modgui: <http://moddevices.com/ns/modgui#> .
+@prefix pg: <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix pprops: <http://lv2plug.in/ns/ext/port-props#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix resize: <http://lv2plug.in/ns/ext/resize-port#> .
+@prefix time: <http://lv2plug.in/ns/ext/time#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix urid: <http://lv2plug.in/ns/ext/urid#> .
+
+<https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect> modgui:gui [
+    modgui:resourcesDirectory <modgui> ; modgui:iconTemplate <modgui/icon.html> ;
+    modgui:stylesheet <modgui/style.css> ; modgui:label "Atomic Cluster" ;
+    modgui:screenshot <modgui/screenshot.png> ; modgui:thumbnail <modgui/thumbnail.png> ;
+    modgui:brand "Jerzy" ; modgui:model "boxy" ; modgui:panel "12-knobs" ;
+    modgui:color "purple" ; modgui:knob "cream" ;
+    modgui:port [ lv2:index 0 ; lv2:symbol "volume" ; lv2:name "Volume" ], [ lv2:index 1 ; lv2:symbol "blend" ; lv2:name "Blend" ], [ lv2:index 2 ; lv2:symbol "speed_ms" ; lv2:name "Speed (Free)" ], [ lv2:index 3 ; lv2:symbol "atoms" ; lv2:name "Atoms" ], [ lv2:index 4 ; lv2:symbol "smooth" ; lv2:name "Sharp / Smooth" ], [ lv2:index 5 ; lv2:symbol "flat" ; lv2:name "Flat dynamics" ], [ lv2:index 6 ; lv2:symbol "enabled" ; lv2:name "Enabled" ], [ lv2:index 7 ; lv2:symbol "sync" ; lv2:name "BPM Sync" ], [ lv2:index 8 ; lv2:symbol "division" ; lv2:name "Sync division" ], [ lv2:index 9 ; lv2:symbol "pattern" ; lv2:name "Atom pattern" ], [ lv2:index 10 ; lv2:symbol "stereo" ; lv2:name "Stereo width" ], [ lv2:index 11 ; lv2:symbol "bpm" ; lv2:name "BPM / fallback" ], [ lv2:index 12 ; lv2:symbol "tap" ; lv2:name "Tap BPM (Sync)" ] ] .

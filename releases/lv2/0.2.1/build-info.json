@@ -1,0 +1,25 @@
+{
+  "version": "0.2.1",
+  "plugin_uri": "https://jurekbak71-dev.github.io/JerzyAtomicCluster#effect",
+  "architectures": {
+    "aarch64": {
+      "sha256": "12c534c4a2e99e04e68b6220d56fd37854ad0b07b64edd8859253372c23ac81e",
+      "size": 178336,
+      "needed": [
+        "libm.so.6",
+        "libc.so.6"
+      ],
+      "max_glibc": "2.17"
+    },
+    "armhf": {
+      "sha256": "281b01d57f6e4b13c0a5c62781158e286a60191a982d75880afee6d6029030c1",
+      "size": 90948,
+      "needed": [
+        "libm.so.6",
+        "libc.so.6",
+        "ld-linux-armhf.so.3"
+      ],
+      "max_glibc": "2.4"
+    }
+  }
+}

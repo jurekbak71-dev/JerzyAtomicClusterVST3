@@ -1,5 +1,10 @@
 # Jerzy Atomic Cluster — VST3 0.2.1
 
+**LV2 dla Raspberry Pi 4B / MODEP / Zynthian:**
+[Pobierz ARM64 + ARMHF](releases/lv2/0.2.1/JerzyAtomicCluster-LV2-RPi4B.zip) ·
+[Instrukcja instalacji](docs/LV2_RPI4_PL.md) · [Testy LV2/ARM](docs/LV2_VALIDATION.md).
+
+
 Efekt dla Windows x64: harmoniczne atomy, rytmiczne arpeggio, losowe wzory
 i niezależny ruch głosów w stereo. Własny algorytm inspirowany Pico Atomic
 Cluster, rozwinięty według uwag odsłuchowych użytkownika.
